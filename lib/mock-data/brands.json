@@ -1,0 +1,86 @@
+[
+  {
+    "id": "brand_ahc",
+    "name": "AHC",
+    "slug": "ahc",
+    "logo": "https://images.unsplash.com/photo-1611930022073-b7a4ba5fcccd?w=200",
+    "banner": "https://images.unsplash.com/photo-1611930022073-b7a4ba5fcccd?w=1920",
+    "description": "AHC is a leading Korean cosmetics brand known for high-quality skincare products with innovative formulations.",
+    "product_count": 12,
+    "seo": {
+      "meta_title": "AHC Korean Skincare | Made Korea",
+      "meta_description": "Shop AHC premium Korean skincare products",
+      "keywords": ["ahc", "korean skincare", "ahc products"]
+    }
+  },
+  {
+    "id": "brand_cosrx",
+    "name": "COSRX",
+    "slug": "cosrx",
+    "logo": "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=200",
+    "banner": "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=1920",
+    "description": "COSRX focuses on simple, effective skincare solutions using high-quality ingredients.",
+    "product_count": 18,
+    "seo": {
+      "meta_title": "COSRX Skincare Products | Made Korea",
+      "meta_description": "Discover COSRX effective skincare solutions",
+      "keywords": ["cosrx", "korean beauty", "cosrx products"]
+    }
+  },
+  {
+    "id": "brand_innisfree",
+    "name": "Innisfree",
+    "slug": "innisfree",
+    "logo": "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=200",
+    "banner": "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=1920",
+    "description": "Innisfree brings the pure beauty of Jeju Island with natural, eco-friendly skincare.",
+    "product_count": 24,
+    "seo": {
+      "meta_title": "Innisfree Natural Skincare | Made Korea",
+      "meta_description": "Natural skincare from Jeju Island by Innisfree",
+      "keywords": ["innisfree", "natural skincare", "jeju island"]
+    }
+  },
+  {
+    "id": "brand_laneige",
+    "name": "Laneige",
+    "slug": "laneige",
+    "logo": "https://images.unsplash.com/photo-1570554886111-e80fcca6a029?w=200",
+    "banner": "https://images.unsplash.com/photo-1570554886111-e80fcca6a029?w=1920",
+    "description": "Laneige is a premium Korean beauty brand specializing in hydrating skincare solutions.",
+    "product_count": 15,
+    "seo": {
+      "meta_title": "Laneige Hydrating Skincare | Made Korea",
+      "meta_description": "Premium hydrating skincare by Laneige",
+      "keywords": ["laneige", "hydrating skincare", "water science"]
+    }
+  },
+  {
+    "id": "brand_etude",
+    "name": "Etude House",
+    "slug": "etude-house",
+    "logo": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=200",
+    "banner": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=1920",
+    "description": "Etude House offers playful, high-quality makeup and skincare for youthful beauty.",
+    "product_count": 20,
+    "seo": {
+      "meta_title": "Etude House Makeup & Skincare | Made Korea",
+      "meta_description": "Playful and effective beauty products by Etude House",
+      "keywords": ["etude house", "korean makeup", "youthful beauty"]
+    }
+  },
+  {
+    "id": "brand_sulwhasoo",
+    "name": "Sulwhasoo",
+    "slug": "sulwhasoo",
+    "logo": "https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=200",
+    "banner": "https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=1920",
+    "description": "Sulwhasoo combines traditional Korean herbal medicine with modern science for luxury skincare.",
+    "product_count": 10,
+    "seo": {
+      "meta_title": "Sulwhasoo Luxury Skincare | Made Korea",
+      "meta_description": "Luxury Korean skincare with herbal medicine",
+      "keywords": ["sulwhasoo", "luxury skincare", "korean herbs"]
+    }
+  }
+]

@@ -1,0 +1,104 @@
+[
+  {
+    "id": "vendor_001",
+    "company_name": "Consumer Innovations Direct",
+    "contact_name": "Kim Min-jun",
+    "email": "contact@kbeautydirect.com",
+    "phone": "+82-2-1234-5678",
+    "kyc_docs": ["doc_001.pdf", "doc_002.pdf"],
+    "gst_tax_id": "GST123456789",
+    "payout_method": {
+      "type": "bank_transfer",
+      "details": {
+        "account_name": "Consumer Innovations Direct Co Ltd",
+        "bank_name": "KB Kookmin Bank"
+      }
+    },
+    "commission_rate": 15,
+    "status": "approved",
+    "created_at": "2023-06-15T10:00:00Z",
+    "updated_at": "2024-10-01T08:30:00Z",
+    "bank_details": {
+      "account_holder_name": "Consumer Innovations Direct Co Ltd",
+      "account_number": "1234567890",
+      "bank_name": "KB Kookmin Bank",
+      "ifsc_code": "KKBK0001234",
+      "account_type": "current"
+    },
+    "address": {
+      "id": "addr_v001",
+      "name": "Consumer Innovations Direct",
+      "phone": "+82-2-1234-5678",
+      "address_line1": "123 Gangnam-daero",
+      "address_line2": "Gangnam-gu",
+      "city": "Seoul",
+      "state": "Seoul",
+      "postal_code": "06236",
+      "country": "South Korea",
+      "is_default": true
+    }
+  },
+  {
+    "id": "vendor_002",
+    "company_name": "Seoul Beauty Co",
+    "contact_name": "Park Ji-woo",
+    "email": "info@seoulbeauty.kr",
+    "phone": "+82-2-9876-5432",
+    "kyc_docs": ["doc_003.pdf"],
+    "gst_tax_id": "GST987654321",
+    "payout_method": {
+      "type": "bank_transfer",
+      "details": {
+        "account_name": "Seoul Beauty Company",
+        "bank_name": "Shinhan Bank"
+      }
+    },
+    "commission_rate": 12,
+    "status": "approved",
+    "created_at": "2023-09-20T14:15:00Z",
+    "updated_at": "2024-09-28T16:45:00Z",
+    "bank_details": {
+      "account_holder_name": "Seoul Beauty Company",
+      "account_number": "9876543210",
+      "bank_name": "Shinhan Bank",
+      "ifsc_code": "SHBK0009876",
+      "account_type": "current"
+    }
+  },
+  {
+    "id": "vendor_003",
+    "company_name": "Beauty Hub Korea",
+    "contact_name": "Lee Seo-yeon",
+    "email": "hello@beautyhubkorea.com",
+    "phone": "+82-2-5555-7777",
+    "kyc_docs": ["doc_004.pdf", "doc_005.pdf"],
+    "gst_tax_id": "GST555777999",
+    "payout_method": {
+      "type": "bank_transfer",
+      "details": {
+        "account_name": "Beauty Hub Korea Ltd",
+        "bank_name": "Woori Bank"
+      }
+    },
+    "commission_rate": 18,
+    "status": "approved",
+    "created_at": "2023-11-10T09:30:00Z",
+    "updated_at": "2024-10-05T12:20:00Z"
+  },
+  {
+    "id": "vendor_004",
+    "company_name": "Premium K-Cosmetics",
+    "contact_name": "Choi Hyun-woo",
+    "email": "support@premiumkcosmetics.com",
+    "phone": "+82-2-8888-9999",
+    "kyc_docs": [],
+    "payout_method": {
+      "type": "bank_transfer",
+      "details": {}
+    },
+    "commission_rate": 15,
+    "status": "pending",
+    "created_at": "2024-10-01T11:00:00Z",
+    "updated_at": "2024-10-01T11:00:00Z"
+  }
+]

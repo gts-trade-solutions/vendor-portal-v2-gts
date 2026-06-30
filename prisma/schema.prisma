@@ -1,0 +1,2110 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model brands {
+  id                 String               @id @db.Char(36)
+  slug               String               @unique @db.VarChar(255)
+  name               String               @db.MediumText
+  description        String?              @db.MediumText
+  created_at         DateTime             @default(now()) @db.DateTime(6)
+  thumbnail_path     String?              @db.MediumText
+  thumbnail_url      String?              @db.MediumText
+  active             Boolean              @default(true)
+  position           Int                  @default(10)
+  updated_at         DateTime             @default(now()) @db.DateTime(6)
+  brand_code         String?              @unique(map: "brands_brand_code_idx") @db.VarChar(255)
+  brand_translations brand_translations[]
+  inventory_units    inventory_units[]
+  products           products[]
+
+  @@index([position])
+}
+
+model categories {
+  id                    String                  @id @db.Char(36)
+  slug                  String                  @unique @db.VarChar(255)
+  name                  String                  @db.MediumText
+  description           String?                 @db.MediumText
+  parent_id             String?                 @db.Char(36)
+  created_at            DateTime                @default(now()) @db.DateTime(6)
+  updated_at            DateTime                @default(now()) @db.DateTime(6)
+  categories            categories?             @relation("categoriesTocategories", fields: [parent_id], references: [id], onUpdate: NoAction, map: "categories_parent_fk")
+  other_categories      categories[]            @relation("categoriesTocategories")
+  category_translations category_translations[]
+  products              products[]
+
+  @@index([parent_id], map: "categories_parent_id_fkey")
+}
+
+model product_images {
+  id           String   @id @db.Char(36)
+  product_id   String   @db.Char(36)
+  storage_path String   @db.VarChar(255)
+  alt          String?  @db.MediumText
+  sort_order   Int      @default(0)
+  created_at   DateTime @default(now()) @db.DateTime(6)
+  products     products @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "product_images_product_fk")
+
+  @@unique([product_id, storage_path], map: "product_images_unique_per_path")
+  @@index([product_id], map: "product_images_product_idx")
+  @@index([product_id, sort_order], map: "product_images_product_sort")
+  @@index([sort_order], map: "product_images_sort_idx")
+}
+
+model products {
+  id                             String                           @id @db.Char(36)
+  sku                            String?                          @unique @db.VarChar(255)
+  slug                           String                           @unique @db.VarChar(255)
+  name                           String                           @db.VarChar(255)
+  short_description              String?                          @db.MediumText
+  description                    String?                          @db.MediumText
+  brand                          String?                          @db.MediumText
+  price                          Decimal?                         @db.Decimal(12, 2)
+  currency                       String?                          @default("INR") @db.VarChar(512)
+  country_of_origin              String?                          @db.MediumText
+  volume_ml                      Decimal?                         @db.Decimal(10, 2)
+  net_weight_g                   Decimal?                         @db.Decimal(10, 2)
+  attributes                     Json                             @default(dbgenerated("(cast(_utf8mb4\\'{}\\' as json))"))
+  category_id                    String                           @db.Char(36)
+  hero_image_path                String?                          @db.MediumText
+  is_published                   Boolean                          @default(true)
+  created_at                     DateTime                         @default(now()) @db.DateTime(6)
+  updated_at                     DateTime                         @default(now()) @db.DateTime(6)
+  brand_id                       String?                          @db.Char(36)
+  compare_at_price               Decimal?                         @db.Decimal(12, 2)
+  sale_price                     Decimal?                         @db.Decimal(12, 2)
+  vendor_price                   Decimal?                         @db.Decimal(12, 2)
+  sale_starts_at                 DateTime?                        @db.DateTime(6)
+  sale_ends_at                   DateTime?                        @db.DateTime(6)
+  is_featured                    Boolean                          @default(false)
+  is_trending                    Boolean                          @default(false)
+  featured_rank                  Int?
+  new_until                      DateTime?                        @db.DateTime(6)
+  meta_title                     String?                          @db.MediumText
+  meta_description               String?                          @db.MediumText
+  og_image_path                  String?                          @db.MediumText
+  views_count                    BigInt                           @default(0)
+  purchases_count                BigInt                           @default(0)
+  last_viewed_at                 DateTime?                        @db.DateTime(6)
+  last_purchased_at              DateTime?                        @db.DateTime(6)
+  deleted_at                     DateTime?                        @db.DateTime(6)
+  vendor_id                      String?                          @db.Char(36)
+  track_inventory                Boolean                          @default(true)
+  stock_qty                      Int                              @default(0)
+  ingredients_md                 String?                          @db.MediumText
+  additional_details_md          String?                          @db.MediumText
+  key_features_md                String?                          @db.MediumText
+  faq                            Json                             @default(dbgenerated("(cast(_utf8mb4\\'[]\\' as json))"))
+  key_benefits                   Json                             @default(dbgenerated("(cast(_utf8mb4\\'[]\\' as json))"))
+  additional_details             Json                             @default(dbgenerated("(cast(_utf8mb4\\'{}\\' as json))"))
+  made_in_korea                  Boolean                          @default(false)
+  is_vegetarian                  Boolean                          @default(false)
+  cruelty_free                   Boolean                          @default(false)
+  toxin_free                     Boolean                          @default(false)
+  paraben_free                   Boolean                          @default(false)
+  video_path                     String?                          @db.MediumText
+  promo_exempt                   Boolean                          @default(false)
+  expiry_date                    DateTime?                        @db.Date
+  product_code                   String?                          @unique(map: "products_product_code_idx") @db.VarChar(255)
+  brand_code                     String?                          @db.MediumText
+  hsn                            String?                          @db.MediumText
+  box_contents_md                String?                          @db.MediumText
+  is_bundle                      Boolean                          @default(false)
+  gross_weight_g                 Decimal?                         @db.Decimal(8, 2)
+  inventory_product_id           String?                          @db.Char(36)
+  purchase_price                 Decimal                          @default(0.00) @db.Decimal(12, 2)
+  cart_items                     cart_items[]
+  home_influencer_video_products home_influencer_video_products[]
+  home_product_video_products    home_product_video_products[]
+  home_product_videos            home_product_videos[]
+  influence_caps                 influence_caps?
+  inventory_units                inventory_units[]
+  invoice_batch_items            invoice_batch_items[]
+  invoice_units                  invoice_units[]
+  order_attribution_items        order_attribution_items[]
+  order_items                    order_items[]
+  product_country_prices         product_country_prices[]
+  product_images                 product_images[]
+  product_reviews                product_reviews[]
+  product_story_blocks           product_story_blocks[]
+  product_translations           product_translations[]
+  product_videos                 product_videos[]
+  brands                         brands?                          @relation(fields: [brand_id], references: [id], onUpdate: NoAction, map: "products_brand_fk")
+  categories                     categories                       @relation(fields: [category_id], references: [id], onUpdate: NoAction, map: "products_category_fk")
+  products                       products?                        @relation("productsToproducts", fields: [inventory_product_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "products_inventory_self_fk")
+  other_products                 products[]                       @relation("productsToproducts")
+  vendors                        vendors?                         @relation(fields: [vendor_id], references: [id], onUpdate: NoAction)
+  promo_codes                    promo_codes[]
+  referral_links                 referral_links[]
+  wishlist_items                 wishlist_items[]
+
+  @@index([inventory_product_id], map: "idx_products_inventory_product")
+  @@index([vendor_id, expiry_date], map: "idx_products_vendor_expiry_date")
+  @@index([brand_id])
+  @@index([category_id], map: "products_category_idx")
+  @@index([featured_rank], map: "products_featured_idx")
+  @@index([is_bundle])
+  @@index([new_until])
+  @@index([is_published, created_at], map: "products_pub_created_idx")
+  @@index([is_trending], map: "products_trending_idx")
+  @@index([vendor_id], map: "products_vendor_idx")
+  @@fulltext([name, short_description, description], map: "products_ft")
+}
+
+model delete_debug {
+  id     Int       @id @default(autoincrement())
+  msg    String?   @db.MediumText
+  constr String?   @db.MediumText
+  ts     DateTime? @default(now()) @db.DateTime(6)
+
+  @@map("_delete_debug")
+}
+
+model addresses {
+  id                                              String     @id @db.Char(36)
+  user_id                                         String     @db.Char(36)
+  line1                                           String     @db.MediumText
+  line2                                           String?    @db.MediumText
+  city                                            String     @db.MediumText
+  state                                           String     @db.MediumText
+  pincode                                         String     @db.MediumText
+  country                                         String     @default("India") @db.VarChar(512)
+  is_default                                      Boolean    @default(false)
+  created_at                                      DateTime   @default(now()) @db.DateTime(6)
+  updated_at                                      DateTime   @default(now()) @db.DateTime(6)
+  name                                            String?    @db.MediumText
+  phone                                           String?    @db.MediumText
+  email                                           String?    @db.MediumText
+  landmark                                        String?    @db.MediumText
+  profiles_addresses_user_idToprofiles            profiles   @relation("addresses_user_idToprofiles", fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  orders                                          orders[]
+  profiles_profiles_default_address_idToaddresses profiles[] @relation("profiles_default_address_idToaddresses")
+
+  @@index([user_id], map: "addresses_default_unique")
+  @@index([user_id], map: "addresses_user_idx")
+}
+
+model admin_notification_reads {
+  notification_id     String              @db.Char(36)
+  admin_id            String              @db.Char(36)
+  read_at             DateTime            @default(now()) @db.DateTime(6)
+  admin_notifications admin_notifications @relation(fields: [notification_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([notification_id, admin_id])
+  @@index([admin_id], map: "idx_anr_admin_id")
+}
+
+model admin_notifications {
+  id                       String                     @id @db.Char(36)
+  type                     String                     @db.VarChar(255)
+  title                    String                     @db.MediumText
+  body                     String?                    @db.MediumText
+  link                     String?                    @db.MediumText
+  severity                 String                     @default("info") @db.VarChar(512)
+  meta                     Json?
+  created_at               DateTime                   @default(now()) @db.DateTime(6)
+  created_by               String?                    @db.Char(36)
+  admin_notification_reads admin_notification_reads[]
+
+  @@index([created_at], map: "idx_admin_notifications_created_at")
+  @@index([type], map: "idx_admin_notifications_type")
+}
+
+model app_admins {
+  user_id    String   @id @db.Char(36)
+  email      String?  @unique @db.VarChar(255)
+  created_at DateTime @default(now()) @db.DateTime(6)
+}
+
+model banner_translations {
+  id           String       @id @db.Char(36)
+  banner_id    String       @db.Char(36)
+  locale       String       @db.VarChar(255)
+  title        String?      @db.MediumText
+  alt          String?      @db.MediumText
+  source_hash  String?      @db.MediumText
+  source       String       @default("ai") @db.VarChar(512)
+  created_at   DateTime     @default(now()) @db.DateTime(6)
+  updated_at   DateTime     @default(now()) @db.DateTime(6)
+  home_banners home_banners @relation(fields: [banner_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([banner_id, locale])
+  @@index([banner_id, locale], map: "banner_translations_lookup")
+}
+
+model batches {
+  id                  String                @id @db.Char(36)
+  batch_code          String                @unique @db.VarChar(255)
+  product_id          String                @db.Char(36)
+  quantity            Int
+  start_date          DateTime              @db.Date
+  expiry_date         DateTime              @db.Date
+  status              String?               @default("IN_STOCK") @db.VarChar(512)
+  created_at          DateTime?             @default(now()) @db.DateTime(6)
+  updated_at          DateTime?             @default(now()) @db.DateTime(6)
+  inventory_units     inventory_units[]
+  invoice_batch_items invoice_batch_items[]
+}
+
+model brand_translations {
+  id          String   @id @db.Char(36)
+  brand_id    String   @db.Char(36)
+  locale      String   @db.VarChar(255)
+  description String?  @db.MediumText
+  source_hash String?  @db.MediumText
+  source      String   @default("ai") @db.VarChar(512)
+  created_at  DateTime @default(now()) @db.DateTime(6)
+  updated_at  DateTime @default(now()) @db.DateTime(6)
+  brands      brands   @relation(fields: [brand_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([brand_id, locale])
+  @@index([brand_id, locale], map: "brand_translations_lookup")
+}
+
+model campaign_posts {
+  id                   String             @id @db.Char(36)
+  campaign_id          String             @db.Char(36)
+  instagram_account_id String             @db.Char(36)
+  caption              String?            @db.MediumText
+  media_type           String             @default("image") @db.VarChar(64)
+  media_url            String?            @db.MediumText
+  thumbnail_url        String?            @db.MediumText
+  scheduled_at         DateTime?          @db.DateTime(6)
+  published_at         DateTime?          @db.DateTime(6)
+  status               String             @default("draft") @db.VarChar(64)
+  instagram_media_id   String?            @db.MediumText
+  permalink            String?            @db.MediumText
+  error_message        String?            @db.MediumText
+  created_at           DateTime?          @default(now()) @db.DateTime(6)
+  updated_at           DateTime?          @default(now()) @db.DateTime(6)
+  campaigns            campaigns          @relation(fields: [campaign_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  instagram_accounts   instagram_accounts @relation(fields: [instagram_account_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([campaign_id], map: "campaign_posts_campaign_id_fkey")
+  @@index([instagram_account_id], map: "campaign_posts_instagram_account_id_fkey")
+}
+
+model campaigns {
+  id                   String             @id @db.Char(36)
+  owner_id             String             @db.Char(36)
+  instagram_account_id String             @db.Char(36)
+  name                 String             @db.MediumText
+  description          String?            @db.MediumText
+  status               String             @default("draft") @db.VarChar(64)
+  start_date           DateTime?          @db.Date
+  end_date             DateTime?          @db.Date
+  created_at           DateTime?          @default(now()) @db.DateTime(6)
+  updated_at           DateTime?          @default(now()) @db.DateTime(6)
+  campaign_posts       campaign_posts[]
+  instagram_accounts   instagram_accounts @relation(fields: [instagram_account_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  profiles             profiles           @relation(fields: [owner_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([instagram_account_id], map: "campaigns_instagram_account_id_fkey")
+  @@index([owner_id], map: "campaigns_owner_id_fkey")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model cart_items {
+  id              String   @id @db.Char(36)
+  cart_id         String   @db.Char(36)
+  product_id      String   @db.Char(36)
+  sku             String?  @db.MediumText
+  name            String   @db.MediumText
+  hero_image_path String?  @db.MediumText
+  unit_price      Decimal  @db.Decimal(12, 2)
+  mrp             Decimal? @db.Decimal(12, 2)
+  quantity        Int      @default(1)
+  line_total      Decimal  @db.Decimal(12, 2)
+  created_at      DateTime @default(now()) @db.DateTime(6)
+  updated_at      DateTime @default(now()) @db.DateTime(6)
+  carts           carts    @relation(fields: [cart_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  products        products @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([cart_id, product_id], map: "cart_items_unique")
+  @@index([cart_id], map: "cart_items_cart_idx")
+  @@index([product_id], map: "cart_items_product_id_fkey")
+}
+
+model carts {
+  id                    String       @id @db.Char(36)
+  user_id               String       @unique(map: "carts_user_unique") @db.Char(36)
+  currency              String       @default("INR") @db.VarChar(512)
+  subtotal              Decimal      @default(0.00) @db.Decimal(12, 2)
+  shipping_fee_estimate Decimal      @default(0.00) @db.Decimal(12, 2)
+  discount_total        Decimal      @default(0.00) @db.Decimal(12, 2)
+  total_estimate        Decimal      @default(0.00) @db.Decimal(12, 2)
+  created_at            DateTime     @default(now()) @db.DateTime(6)
+  updated_at            DateTime     @default(now()) @db.DateTime(6)
+  cart_items            cart_items[]
+  profiles              profiles     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([user_id], map: "carts_user_idx")
+}
+
+model category_translations {
+  id          String     @id @db.Char(36)
+  category_id String     @db.Char(36)
+  locale      String     @db.VarChar(255)
+  name        String?    @db.MediumText
+  description String?    @db.MediumText
+  source_hash String?    @db.MediumText
+  source      String     @default("ai") @db.VarChar(512)
+  created_at  DateTime   @default(now()) @db.DateTime(6)
+  updated_at  DateTime   @default(now()) @db.DateTime(6)
+  categories  categories @relation(fields: [category_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([category_id, locale])
+  @@index([category_id, locale], map: "category_translations_lookup")
+}
+
+model contact_messages {
+  id         BigInt   @id @default(autoincrement())
+  name       String   @db.MediumText
+  email      String   @db.MediumText
+  phone      String?  @db.MediumText
+  subject    String?  @db.MediumText
+  message    String   @db.MediumText
+  status     String   @default("new") @db.VarChar(512)
+  created_at DateTime @default(now()) @db.DateTime(6)
+}
+
+model country_contacts {
+  country_code    String   @id @db.VarChar(255)
+  public_phone    String?  @db.MediumText
+  whatsapp_number String?  @db.MediumText
+  support_email   String?  @db.MediumText
+  business_hours  String?  @db.MediumText
+  public_address  String?  @db.MediumText
+  is_active       Boolean  @default(true)
+  updated_at      DateTime @default(now()) @db.DateTime(6)
+  updated_by      String?  @db.Char(36)
+  contact_name    String?  @db.MediumText
+
+  @@index([country_code], map: "idx_country_contacts_active")
+}
+
+model country_shipping_rates {
+  country       String   @id @db.VarChar(255)
+  active        Boolean  @default(true)
+  notes         String?  @db.MediumText
+  created_at    DateTime @default(now()) @db.DateTime(6)
+  updated_at    DateTime @default(now()) @db.DateTime(6)
+  eta_days_min  Int?
+  eta_days_max  Int?
+  slab_500g_inr Decimal  @db.Decimal(10, 2)
+  slab_1kg_inr  Decimal  @db.Decimal(10, 2)
+  slab_2kg_inr  Decimal  @db.Decimal(10, 2)
+  slab_3kg_inr  Decimal  @db.Decimal(10, 2)
+  slab_5kg_inr  Decimal  @db.Decimal(10, 2)
+  slab_7kg_inr  Decimal  @db.Decimal(10, 2)
+  slab_10kg_inr Decimal  @db.Decimal(10, 2)
+  slab_15kg_inr Decimal  @db.Decimal(10, 2)
+  slab_20kg_inr Decimal  @db.Decimal(10, 2)
+
+  @@index([active])
+}
+
+model currency_rates {
+  code            String   @id @db.VarChar(255)
+  name            String   @db.MediumText
+  symbol          String   @db.MediumText
+  decimals        Int      @default(2)
+  rate_from_inr   Decimal  @db.Decimal(20, 6)
+  active          Boolean  @default(true)
+  last_updated_at DateTime @default(now()) @db.DateTime(6)
+}
+
+model customers {
+  id                                                          String            @id @db.Char(36)
+  vendor_id                                                   String            @db.Char(36)
+  name                                                        String            @db.MediumText
+  phone                                                       String?           @db.VarChar(255)
+  email                                                       String?           @db.VarChar(255)
+  address                                                     String?           @db.MediumText
+  created_at                                                  DateTime          @default(now()) @db.DateTime(6)
+  updated_at                                                  DateTime          @default(now()) @db.DateTime(6)
+  vendors                                                     vendors           @relation(fields: [vendor_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  inventory_units_inventory_units_demo_customer_idTocustomers inventory_units[] @relation("inventory_units_demo_customer_idTocustomers")
+  inventory_units_inventory_units_sold_customer_idTocustomers inventory_units[] @relation("inventory_units_sold_customer_idTocustomers")
+
+  @@index([vendor_id, email], map: "customers_vendor_email_idx")
+  @@index([vendor_id, email], map: "customers_vendor_email_unique")
+  @@index([vendor_id])
+  @@index([vendor_id, phone], map: "customers_vendor_phone_idx")
+  @@index([vendor_id, phone], map: "customers_vendor_phone_unique")
+}
+
+model dtdc_api_logs {
+  id             String          @id @db.Char(36)
+  shipment_id    String?         @db.Char(36)
+  api_name       String          @db.MediumText
+  endpoint       String?         @db.MediumText
+  request        Json?
+  response       Json?
+  http_status    Int?
+  success        Boolean?
+  created_at     DateTime        @default(now()) @db.DateTime(6)
+  dtdc_shipments dtdc_shipments? @relation(fields: [shipment_id], references: [id], onUpdate: NoAction)
+
+  @@index([created_at], map: "idx_dtdc_api_logs_created_at")
+  @@index([shipment_id], map: "idx_dtdc_api_logs_shipment_id")
+}
+
+model dtdc_shipment_events {
+  id             String         @id @db.Char(36)
+  shipment_id    String         @db.Char(36)
+  event_at       DateTime?      @db.DateTime(6)
+  action         String?        @db.VarChar(255)
+  status_code    String?        @db.MediumText
+  origin         String?        @db.MediumText
+  destination    String?        @db.MediumText
+  remarks        String?        @db.MediumText
+  raw            Json?
+  created_at     DateTime       @default(now()) @db.DateTime(6)
+  dtdc_shipments dtdc_shipments @relation(fields: [shipment_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([shipment_id, event_at, action], map: "uniq_dtdc_events_dedup")
+  @@index([event_at], map: "idx_dtdc_events_event_at")
+  @@index([shipment_id], map: "idx_dtdc_events_shipment_id")
+}
+
+model dtdc_shipments {
+  id                      String                 @id @db.Char(36)
+  order_id                String                 @db.Char(36)
+  reference_number        String?                @db.VarChar(255)
+  customer_code           String?                @db.MediumText
+  status                  String                 @default("draft") @db.VarChar(64)
+  is_active               Boolean                @default(true)
+  service_type_id         String?                @db.MediumText
+  commodity_id            String?                @db.MediumText
+  load_type               String?                @db.MediumText
+  is_cod                  Boolean                @default(false)
+  cod_amount              Decimal?               @db.Decimal(12, 2)
+  weight_kg               Decimal?               @db.Decimal(10, 3)
+  length_cm               Decimal?               @db.Decimal(10, 2)
+  breadth_cm              Decimal?               @db.Decimal(10, 2)
+  height_cm               Decimal?               @db.Decimal(10, 2)
+  last_label_code         String?                @db.MediumText
+  last_label_format       String?                @db.MediumText
+  label_last_generated_at DateTime?              @db.DateTime(6)
+  dtdc_request            Json?
+  dtdc_response           Json?
+  last_error              String?                @db.MediumText
+  created_at              DateTime               @default(now()) @db.DateTime(6)
+  updated_at              DateTime               @default(now()) @db.DateTime(6)
+  last_polled_at          DateTime?              @db.DateTime(6)
+  status_last_changed_at  DateTime?              @db.DateTime(6)
+  dtdc_api_logs           dtdc_api_logs[]
+  dtdc_shipment_events    dtdc_shipment_events[]
+  orders                  orders                 @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([is_active, last_polled_at], map: "idx_dtdc_shipments_active_poll")
+  @@index([order_id], map: "idx_dtdc_shipments_order_id")
+  @@index([status], map: "idx_dtdc_shipments_status")
+  @@index([order_id], map: "uniq_dtdc_shipments_active_order")
+  @@index([reference_number], map: "uniq_dtdc_shipments_reference_number")
+}
+
+model dtdc_tracking_tokens {
+  id         String    @id @db.Char(36)
+  env        String    @db.VarChar(255)
+  token      String    @db.MediumText
+  expires_at DateTime? @db.DateTime(6)
+  created_at DateTime  @default(now()) @db.DateTime(6)
+
+  @@index([env], map: "idx_dtdc_tracking_tokens_env")
+}
+
+model email_campaign {
+  id                       String                     @id @db.Char(36)
+  subject                  String                     @db.MediumText
+  body_html                String                     @db.MediumText
+  target_type              String                     @db.VarChar(64)
+  created_at               DateTime                   @default(now()) @db.DateTime(6)
+  created_by               String?                    @db.Char(36)
+  status                   String                     @default("draft") @db.VarChar(64)
+  send_started_at          DateTime?                  @db.DateTime(6)
+  send_completed_at        DateTime?                  @db.DateTime(6)
+  email_campaign_category  email_campaign_category[]
+  email_campaign_recipient email_campaign_recipient[]
+  email_unsubscribe        email_unsubscribe[]
+
+  @@index([created_at])
+}
+
+model email_campaign_category {
+  campaign_id    String         @db.Char(36)
+  category_id    String         @db.Char(36)
+  email_campaign email_campaign @relation(fields: [campaign_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  email_category email_category @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([campaign_id, category_id])
+  @@index([campaign_id], map: "email_campaign_category_campaign_idx")
+  @@index([category_id], map: "email_campaign_category_category_idx")
+}
+
+model email_campaign_recipient {
+  id                      String         @id @db.Char(36)
+  campaign_id             String         @db.Char(36)
+  contact_id              String?        @db.Char(36)
+  email                   String         @db.MediumText
+  name                    String?        @db.MediumText
+  is_registered           Boolean        @default(false)
+  status                  String         @default("pending") @db.VarChar(64)
+  error                   String?        @db.MediumText
+  sent_at                 DateTime?      @db.DateTime(6)
+  ses_message_id          String?        @db.MediumText
+  delivery_event          String?        @db.VarChar(64)
+  delivery_event_at       DateTime?      @db.DateTime(6)
+  delivery_event_payload  Json?
+  has_opened              Boolean        @default(false)
+  opened_at               DateTime?      @db.DateTime(6)
+  has_clicked             Boolean        @default(false)
+  clicked_at              DateTime?      @db.DateTime(6)
+  last_engagement_payload Json?
+  email_campaign          email_campaign @relation(fields: [campaign_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  email_contact           email_contact? @relation(fields: [contact_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([campaign_id], map: "email_campaign_recipient_campaign_idx")
+  @@index([contact_id], map: "email_campaign_recipient_contact_id_fkey")
+  @@index([status])
+}
+
+model email_category {
+  id                      String                    @id @db.Char(36)
+  slug                    String                    @unique @db.VarChar(255)
+  label                   String                    @db.MediumText
+  description             String?                   @db.MediumText
+  created_at              DateTime                  @default(now()) @db.DateTime(6)
+  email_campaign_category email_campaign_category[]
+  email_contact_category  email_contact_category[]
+}
+
+model email_change_requests {
+  id              String    @id @db.Char(36)
+  user_id         String    @db.Char(36)
+  current_email   String    @db.MediumText
+  requested_email String    @db.MediumText
+  status          String    @default("pending") @db.VarChar(255)
+  reason          String?   @db.MediumText
+  admin_note      String?   @db.MediumText
+  requested_at    DateTime  @default(now()) @db.DateTime(6)
+  processed_at    DateTime? @db.DateTime(6)
+  processed_by    String?   @db.Char(36)
+
+  @@index([requested_at], map: "idx_ecr_requested_at")
+  @@index([status], map: "idx_ecr_status")
+  @@index([user_id], map: "idx_ecr_user_id")
+}
+
+model email_contact {
+  id                       String                     @id @db.Char(36)
+  email                    String                     @db.MediumText
+  name                     String?                    @db.MediumText
+  is_registered            Boolean                    @default(false)
+  registered_user_id       String?                    @db.Char(36)
+  created_at               DateTime                   @default(now()) @db.DateTime(6)
+  source                   String?                    @default("manual") @db.VarChar(512)
+  email_campaign_recipient email_campaign_recipient[]
+  email_contact_category   email_contact_category[]
+}
+
+model email_contact_category {
+  contact_id     String         @db.Char(36)
+  category_id    String         @db.Char(36)
+  email_category email_category @relation(fields: [category_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  email_contact  email_contact  @relation(fields: [contact_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([contact_id, category_id])
+  @@index([category_id], map: "email_contact_category_category_idx")
+  @@index([contact_id], map: "email_contact_category_contact_idx")
+}
+
+model email_unsubscribe {
+  id             String          @id @db.Char(36)
+  email          String          @unique @db.VarChar(255)
+  created_at     DateTime        @default(now()) @db.DateTime(6)
+  source         String?         @default("user") @db.VarChar(512)
+  campaign_id    String?         @db.Char(36)
+  email_campaign email_campaign? @relation(fields: [campaign_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([campaign_id], map: "email_unsubscribe_campaign_id_fkey")
+  @@index([email])
+}
+
+model email_verification_tokens {
+  id         String    @id @db.Char(36)
+  user_id    String    @db.Char(36)
+  email      String    @db.MediumText
+  token_hash String    @unique @db.VarChar(255)
+  expires_at DateTime  @db.DateTime(6)
+  used_at    DateTime? @db.DateTime(6)
+  created_at DateTime  @default(now()) @db.DateTime(6)
+
+  @@index([expires_at], map: "idx_evt_expires_at")
+  @@index([used_at], map: "idx_evt_used_at")
+  @@index([user_id], map: "idx_evt_user_id")
+}
+
+model events {
+  id          String   @id @db.Char(36)
+  occurred_at DateTime @default(now()) @db.DateTime(6)
+  user_id     String?  @db.Char(36)
+  anon_id     String   @db.VarChar(255)
+  session_id  String   @db.VarChar(255)
+  event_name  String   @db.VarChar(255)
+  path        String?  @db.MediumText
+  referrer    String?  @db.MediumText
+  user_agent  String?  @db.MediumText
+  ip_prefix   String?  @db.MediumText
+  utm         Json?
+  device      Json?
+  props       Json     @default(dbgenerated("(cast(_utf8mb4\\'{}\\' as json))"))
+
+  @@index([anon_id, occurred_at], map: "events_anon_time_idx")
+  @@index([event_name, occurred_at], map: "events_name_time_idx")
+  @@index([occurred_at])
+  @@index([session_id], map: "events_session_idx")
+  @@index([user_id, occurred_at], map: "events_user_time_idx")
+}
+
+model facebook_ads {
+  id              String          @id @db.Char(36)
+  adset_id        String          @db.Char(36)
+  fb_ad_id        String          @unique(map: "idx_fb_ads_fbid") @db.VarChar(255)
+  name            String?         @db.MediumText
+  creative_id     String?         @db.MediumText
+  status          String?         @db.MediumText
+  created_at      DateTime?       @default(now()) @db.DateTime(6)
+  updated_at      DateTime?       @default(now()) @db.DateTime(6)
+  facebook_adsets facebook_adsets @relation(fields: [adset_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([adset_id], map: "facebook_ads_adset_id_fkey")
+}
+
+model facebook_adsets {
+  id                 String             @id @db.Char(36)
+  campaign_id        String             @db.Char(36)
+  fb_adset_id        String             @unique(map: "idx_fb_adsets_fbid") @db.VarChar(255)
+  name               String             @db.MediumText
+  optimization_goal  String?            @db.MediumText
+  billing_event      String?            @db.MediumText
+  bid_amount         Int?
+  daily_budget       Int?
+  start_time         DateTime?          @db.DateTime(6)
+  end_time           DateTime?          @db.DateTime(6)
+  status             String?            @db.MediumText
+  created_at         DateTime?          @default(now()) @db.DateTime(6)
+  updated_at         DateTime?          @default(now()) @db.DateTime(6)
+  facebook_ads       facebook_ads[]
+  facebook_campaigns facebook_campaigns @relation(fields: [campaign_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([campaign_id], map: "facebook_adsets_campaign_id_fkey")
+}
+
+model facebook_campaigns {
+  id               String            @id @db.Char(36)
+  owner_id         String            @db.Char(36)
+  fb_campaign_id   String            @unique(map: "idx_fb_campaigns_fbid") @db.VarChar(255)
+  fb_ad_account_id String            @db.MediumText
+  name             String            @db.MediumText
+  status           String?           @db.MediumText
+  objective        String?           @db.MediumText
+  daily_budget     Int?
+  created_time     DateTime?         @db.DateTime(6)
+  updated_time     DateTime?         @db.DateTime(6)
+  created_at       DateTime?         @default(now()) @db.DateTime(6)
+  updated_at       DateTime?         @default(now()) @db.DateTime(6)
+  facebook_adsets  facebook_adsets[]
+
+  @@index([owner_id], map: "idx_fb_campaigns_owner")
+}
+
+model facebook_insights {
+  id           String    @id @db.Char(36)
+  fb_object_id String    @db.VarChar(255)
+  object_type  String    @db.VarChar(255)
+  date         DateTime  @db.Date
+  impressions  BigInt?
+  clicks       BigInt?
+  spend        Decimal?  @db.Decimal(20, 6)
+  reach        BigInt?
+  cpm          Decimal?  @db.Decimal(20, 6)
+  cpc          Decimal?  @db.Decimal(20, 6)
+  ctr          Decimal?  @db.Decimal(20, 6)
+  created_at   DateTime? @default(now()) @db.DateTime(6)
+
+  @@index([fb_object_id, object_type, date], map: "idx_fb_insights_object")
+}
+
+model facebook_page_comments {
+  id                String    @id @db.Char(36)
+  owner_id          String    @db.Char(36)
+  facebook_page_id  String    @db.MediumText
+  fb_post_id        String    @db.VarChar(255)
+  fb_comment_id     String    @db.VarChar(255)
+  parent_comment_id String?   @db.MediumText
+  message           String?   @db.MediumText
+  from_id           String?   @db.MediumText
+  from_name         String?   @db.MediumText
+  created_time      DateTime? @db.DateTime(6)
+  like_count        Int?
+  comment_count     Int?
+  is_hidden         Boolean?
+  created_at        DateTime  @default(now()) @db.DateTime(6)
+  updated_at        DateTime  @default(now()) @db.DateTime(6)
+
+  @@unique([owner_id, fb_comment_id], map: "facebook_page_comments_owner_comment_unique")
+  @@index([owner_id, fb_post_id], map: "facebook_page_comments_post_idx")
+}
+
+model facebook_page_posts {
+  id               String    @id @db.Char(36)
+  owner_id         String    @db.Char(36)
+  facebook_page_id String    @db.VarChar(255)
+  fb_post_id       String    @db.VarChar(255)
+  message          String?   @db.MediumText
+  permalink_url    String?   @db.MediumText
+  created_time     DateTime? @db.DateTime(6)
+  impressions      BigInt?
+  reach            BigInt?
+  engagement       BigInt?
+  created_at       DateTime  @default(now()) @db.DateTime(6)
+  updated_at       DateTime  @default(now()) @db.DateTime(6)
+  attachments      Json?
+  insights         Json?
+  reactions_count  Int?
+  comments_count   Int?
+
+  @@unique([owner_id, fb_post_id], map: "facebook_page_posts_owner_post_unique")
+  @@index([owner_id, facebook_page_id], map: "facebook_page_posts_owner_page_idx")
+}
+
+model home_banners {
+  id                  String                @id @db.Char(36)
+  title               String?               @db.MediumText
+  alt                 String                @db.MediumText
+  image_path          String?               @db.MediumText
+  link_url            String?               @db.MediumText
+  active              Boolean               @default(true)
+  starts_at           DateTime?             @db.DateTime(6)
+  ends_at             DateTime?             @db.DateTime(6)
+  position            Int                   @default(0)
+  created_at          DateTime              @default(now()) @db.DateTime(6)
+  updated_at          DateTime              @default(now()) @db.DateTime(6)
+  page_scope          String                @default("home") @db.VarChar(255)
+  video_url           String?               @db.MediumText
+  country             String                @default("IN") @db.VarChar(255)
+  banner_translations banner_translations[]
+
+  @@unique([page_scope, country, position], map: "home_banners_page_country_position_uniq")
+  @@index([active, position], map: "home_banners_active_idx")
+  @@index([active, page_scope, position], map: "home_banners_active_page_idx")
+  @@index([country, page_scope, position], map: "home_banners_country_scope_idx")
+  @@index([starts_at, ends_at], map: "home_banners_time_idx")
+}
+
+model home_influencer_video_products {
+  video_id               String                 @db.Char(36)
+  product_id             String                 @db.Char(36)
+  position               Int                    @default(0)
+  created_at             DateTime               @default(now()) @db.DateTime(6)
+  products               products               @relation(fields: [product_id], references: [id], onUpdate: NoAction)
+  home_influencer_videos home_influencer_videos @relation(fields: [video_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([video_id, product_id])
+  @@index([product_id], map: "hivp_product_idx")
+}
+
+model home_influencer_videos {
+  id                             String                           @id @db.Char(36)
+  influencer_name                String                           @db.MediumText
+  influencer_handle              String?                          @db.MediumText
+  caption                        String?                          @db.MediumText
+  views                          BigInt                           @default(0)
+  video_url                      String?                          @db.MediumText
+  thumbnail_url                  String?                          @db.MediumText
+  instagram_link                 String?                          @db.MediumText
+  page_scope                     String                           @default("home") @db.VarChar(255)
+  position                       Int                              @default(10)
+  active                         Boolean                          @default(true)
+  starts_at                      DateTime?                        @db.DateTime(6)
+  ends_at                        DateTime?                        @db.DateTime(6)
+  created_at                     DateTime                         @default(now()) @db.DateTime(6)
+  updated_at                     DateTime                         @default(now()) @db.DateTime(6)
+  post_url                       String?                          @db.MediumText
+  embed_captioned                Boolean                          @default(false)
+  home_influencer_video_products home_influencer_video_products[]
+
+  @@unique([page_scope, position], map: "home_influencer_scope_position_uniq")
+  @@index([active, page_scope, position], map: "hiv_active_scope_idx")
+  @@index([starts_at, ends_at], map: "hiv_schedule_idx")
+}
+
+model home_product_video_products {
+  video_id            String              @db.Char(36)
+  product_id          String              @db.Char(36)
+  position            Int                 @default(0)
+  created_at          DateTime            @default(now()) @db.DateTime(6)
+  products            products            @relation(fields: [product_id], references: [id], onUpdate: NoAction)
+  home_product_videos home_product_videos @relation(fields: [video_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([video_id, product_id])
+  @@index([product_id], map: "hpvp_product_idx")
+}
+
+model home_product_videos {
+  id                          String                        @id @db.Char(36)
+  product_id                  String?                       @db.Char(36)
+  title                       String                        @db.MediumText
+  description                 String?                       @db.MediumText
+  page_scope                  String                        @default("home") @db.VarChar(255)
+  position                    Int                           @default(10)
+  active                      Boolean                       @default(true)
+  starts_at                   DateTime?                     @db.DateTime(6)
+  ends_at                     DateTime?                     @db.DateTime(6)
+  video_path                  String?                       @db.MediumText
+  video_url                   String?                       @db.MediumText
+  thumbnail_path              String?                       @db.MediumText
+  thumbnail_url               String?                       @db.MediumText
+  created_at                  DateTime                      @default(now()) @db.DateTime(6)
+  updated_at                  DateTime                      @default(now()) @db.DateTime(6)
+  home_product_video_products home_product_video_products[]
+  products                    products?                     @relation(fields: [product_id], references: [id], onUpdate: NoAction)
+
+  @@unique([page_scope, position], map: "home_product_videos_scope_position_uniq")
+  @@index([active, page_scope, position], map: "hpv_active_scope_idx")
+  @@index([product_id], map: "hpv_product_idx")
+  @@index([starts_at, ends_at], map: "hpv_schedule_idx")
+}
+
+model influence_caps {
+  product_id  String   @id @db.Char(36)
+  cap_percent Decimal  @default(20.00) @db.Decimal(5, 2)
+  updated_at  DateTime @default(now()) @db.DateTime(6)
+  products    products @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model influencer_payouts {
+  id                String    @id @db.Char(36)
+  influencer_id     String    @db.Char(36)
+  amount            Decimal   @db.Decimal(12, 2)
+  currency          String    @default("INR") @db.VarChar(512)
+  covering_orders   Json      @default(dbgenerated("(cast(_utf8mb4\\'[]\\' as json))"))
+  status            String    @default("initiated") @db.VarChar(255)
+  notes             String?   @db.MediumText
+  created_at        DateTime  @default(now()) @db.DateTime(6)
+  paid_at           DateTime? @db.DateTime(6)
+  method            String?   @default("manual") @db.VarChar(512)
+  request_note      String?   @db.MediumText
+  contact_email     String?   @db.MediumText
+  settled_reference String?   @db.MediumText
+
+  @@index([influencer_id, status, created_at], map: "idx_influencer_payouts_user_status_created")
+}
+
+model influencer_profiles {
+  user_id                    String   @id @db.Char(36)
+  handle                     String   @unique @db.VarChar(255)
+  display_name               String?  @db.MediumText
+  avatar_url                 String?  @db.MediumText
+  social                     Json?    @default(dbgenerated("(cast(_utf8mb4\\'{}\\' as json))"))
+  default_commission_percent Decimal  @default(10.00) @db.Decimal(5, 2)
+  active                     Boolean  @default(true)
+  created_at                 DateTime @default(now()) @db.DateTime(6)
+  updated_at                 DateTime @default(now()) @db.DateTime(6)
+  payout_meta                Json?    @default(dbgenerated("(cast(_utf8mb4\\'{}\\' as json))"))
+  display_currency           String   @default("INR") @db.VarChar(512)
+  commission_cap_pct         Int      @db.SmallInt
+  default_user_discount_pct  Int      @db.SmallInt
+  applicable_countries       Json     @default(dbgenerated("(cast(_utf8mb4\\'[]\\' as json))"))
+}
+
+model influencer_requests {
+  id          String    @id @db.Char(36)
+  user_id     String    @unique(map: "influencer_requests_user_unique") @db.Char(36)
+  handle      String?   @db.MediumText
+  social      Json      @default(dbgenerated("(cast(_utf8mb4\\'{}\\' as json))"))
+  note        String?   @db.MediumText
+  status      String    @default("pending") @db.VarChar(255)
+  reviewed_by String?   @db.Char(36)
+  reviewed_at DateTime? @db.DateTime(6)
+  created_at  DateTime  @default(now()) @db.DateTime(6)
+  updated_at  DateTime  @default(now()) @db.DateTime(6)
+
+  @@index([status], map: "idx_influencer_requests_status")
+}
+
+model instagram_accounts {
+  id                      String                    @id @db.Char(36)
+  owner_id                String                    @db.Char(36)
+  ig_business_account_id  String                    @db.VarChar(255)
+  username                String?                   @db.MediumText
+  account_type            String?                   @db.MediumText
+  profile_picture_url     String?                   @db.MediumText
+  access_token            String?                   @db.MediumText
+  token_expires_at        DateTime?                 @db.DateTime(6)
+  is_active               Boolean?                  @default(true)
+  created_at              DateTime?                 @default(now()) @db.DateTime(6)
+  updated_at              DateTime?                 @default(now()) @db.DateTime(6)
+  facebook_page_id        String?                   @db.MediumText
+  page_access_token       String?                   @db.MediumText
+  campaign_posts          campaign_posts[]
+  campaigns               campaigns[]
+  profiles                profiles                  @relation(fields: [owner_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  instagram_conversations instagram_conversations[]
+
+  @@unique([owner_id, ig_business_account_id], map: "instagram_accounts_owner_ig_business_unique")
+  @@index([owner_id], map: "instagram_accounts_one_active_per_owner")
+}
+
+model instagram_comments {
+  id                     String    @id @db.Char(36)
+  owner_id               String    @db.Char(36)
+  ig_business_account_id String    @db.MediumText
+  ig_media_id            String    @db.VarChar(255)
+  ig_comment_id          String    @db.VarChar(255)
+  from_username          String?   @db.MediumText
+  message                String?   @db.MediumText
+  is_hidden              Boolean   @default(false)
+  like_count             Int?
+  created_time           DateTime? @db.DateTime(6)
+  created_at             DateTime  @default(now()) @db.DateTime(6)
+  updated_at             DateTime  @default(now()) @db.DateTime(6)
+
+  @@unique([owner_id, ig_comment_id], map: "instagram_comments_owner_comment_unique")
+  @@index([ig_media_id], map: "instagram_comments_media_idx")
+  @@index([owner_id], map: "instagram_comments_owner_idx")
+}
+
+model instagram_conversations {
+  id                          String               @id @db.Char(36)
+  instagram_account_id        String               @db.Char(36)
+  ig_conversation_id          String               @unique(map: "instagram_conversations_ig_id_unique") @db.VarChar(255)
+  participant_ig_user_id      String               @db.MediumText
+  participant_username        String?              @db.MediumText
+  participant_profile_pic_url String?              @db.MediumText
+  last_message                String?              @db.MediumText
+  last_message_at             DateTime?            @db.DateTime(6)
+  unread_count                Int?                 @default(0)
+  created_at                  DateTime?            @default(now()) @db.DateTime(6)
+  updated_at                  DateTime?            @default(now()) @db.DateTime(6)
+  platform                    String               @default("instagram") @db.VarChar(512)
+  instagram_accounts          instagram_accounts   @relation(fields: [instagram_account_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  instagram_messages          instagram_messages[]
+
+  @@index([instagram_account_id], map: "instagram_conversations_instagram_account_id_fkey")
+}
+
+model instagram_media_posts {
+  id                     String    @id @db.Char(36)
+  owner_id               String    @db.Char(36)
+  ig_business_account_id String    @db.VarChar(255)
+  ig_media_id            String    @db.VarChar(255)
+  caption                String?   @db.MediumText
+  media_type             String?   @db.MediumText
+  media_url              String?   @db.MediumText
+  thumbnail_url          String?   @db.MediumText
+  permalink              String?   @db.MediumText
+  like_count             Int?
+  comments_count         Int?
+  timestamp              DateTime? @db.DateTime(6)
+  created_at             DateTime  @default(now()) @db.DateTime(6)
+  updated_at             DateTime  @default(now()) @db.DateTime(6)
+
+  @@unique([owner_id, ig_media_id], map: "instagram_media_owner_media_unique")
+  @@index([ig_business_account_id], map: "instagram_media_ig_id_idx")
+  @@index([owner_id], map: "instagram_media_owner_idx")
+}
+
+model instagram_messages {
+  id                      BigInt                  @id @default(autoincrement())
+  conversation_id         String                  @db.Char(36)
+  ig_message_id           String                  @unique(map: "instagram_messages_ig_id_unique") @db.VarChar(255)
+  sender_type             String                  @db.VarChar(64)
+  sender_ig_user_id       String?                 @db.MediumText
+  sender_username         String?                 @db.MediumText
+  message_type            String                  @default("text") @db.VarChar(512)
+  text                    String?                 @db.MediumText
+  media_url               String?                 @db.MediumText
+  sent_at                 DateTime                @db.DateTime(6)
+  created_at              DateTime?               @default(now()) @db.DateTime(6)
+  platform                String                  @default("instagram") @db.VarChar(512)
+  instagram_conversations instagram_conversations @relation(fields: [conversation_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([conversation_id], map: "instagram_messages_conversation_id_fkey")
+}
+
+model international_orders {
+  id             String   @id @db.Char(36)
+  status         String   @default("new") @db.VarChar(255)
+  customer_name  String   @db.MediumText
+  customer_email String   @db.MediumText
+  customer_phone String?  @db.MediumText
+  country        String   @db.MediumText
+  address        Json
+  cart_snapshot  Json
+  currency_code  String   @db.MediumText
+  display_total  Decimal? @db.Decimal(20, 6)
+  inr_total      Decimal? @db.Decimal(20, 6)
+  notes          String?  @db.MediumText
+  user_id        String?  @db.Char(36)
+  created_at     DateTime @default(now()) @db.DateTime(6)
+  updated_at     DateTime @default(now()) @db.DateTime(6)
+
+  @@index([status, created_at], map: "international_orders_status_idx")
+  @@index([user_id], map: "international_orders_user_idx")
+}
+
+model inventory_events {
+  id              String          @id @db.Char(36)
+  unit_id         String          @db.Char(36)
+  action          String          @db.MediumText
+  from_status     String?         @db.VarChar(64)
+  to_status       String?         @db.VarChar(64)
+  note            String?         @db.MediumText
+  created_by      String?         @db.Char(36)
+  created_at      DateTime        @default(now()) @db.DateTime(6)
+  inventory_units inventory_units @relation(fields: [unit_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([unit_id], map: "inventory_events_unit_id_fkey")
+}
+
+model inventory_units {
+  id                                                    String             @id @db.Char(36)
+  product_id                                            String             @db.Char(36)
+  vendor_id                                             String?            @db.Char(36)
+  unit_code                                             String             @unique @db.VarChar(255)
+  mfg_date                                              DateTime?          @db.Date
+  exp_date                                              DateTime?          @db.Date
+  status                                                String             @default("IN_STOCK") @db.VarChar(64)
+  created_at                                            DateTime           @default(now()) @db.DateTime(6)
+  updated_at                                            DateTime           @default(now()) @db.DateTime(6)
+  price                                                 Decimal            @db.Decimal(12, 2)
+  quantity                                              Int                @default(1)
+  manufacture_date                                      DateTime           @db.Date
+  expiry_date                                           DateTime           @db.Date
+  batch_code                                            String?            @db.MediumText
+  brand_id                                              String?            @db.Char(36)
+  sold_customer_id                                      String?            @db.Char(36)
+  sold_customer_name                                    String?            @db.MediumText
+  sold_customer_phone                                   String?            @db.MediumText
+  sold_customer_email                                   String?            @db.MediumText
+  sold_customer_address                                 String?            @db.MediumText
+  sold_at                                               DateTime?          @db.DateTime(6)
+  batch_id                                              String?            @db.Char(36)
+  is_verified                                           Boolean            @default(false)
+  verified_at                                           DateTime?          @db.DateTime(6)
+  verified_by                                           String?            @db.Char(36)
+  demo_customer_id                                      String?            @db.Char(36)
+  demo_customer_name                                    String?            @db.MediumText
+  demo_customer_phone                                   String?            @db.MediumText
+  demo_at                                               DateTime?          @db.DateTime(6)
+  sold_invoice_id                                       String?            @db.Char(36)
+  scan_code                                             String?            @db.VarChar(255)
+  sold_order_id                                         String?            @db.Char(36)
+  sold_channel                                          String?            @db.MediumText
+  inventory_events                                      inventory_events[]
+  batches                                               batches?           @relation(fields: [batch_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  brands                                                brands?            @relation(fields: [brand_id], references: [id], onUpdate: NoAction)
+  customers_inventory_units_demo_customer_idTocustomers customers?         @relation("inventory_units_demo_customer_idTocustomers", fields: [demo_customer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  products                                              products           @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  customers_inventory_units_sold_customer_idTocustomers customers?         @relation("inventory_units_sold_customer_idTocustomers", fields: [sold_customer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  invoices                                              invoices?          @relation(fields: [sold_invoice_id], references: [id], onUpdate: NoAction)
+  orders                                                orders?            @relation(fields: [sold_order_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  invoice_units                                         invoice_units?
+
+  @@index([product_id], map: "idx_inventory_units_product_id")
+  @@index([sold_order_id], map: "idx_inventory_units_sold_order")
+  @@index([status], map: "idx_inventory_units_status")
+  @@index([vendor_id], map: "idx_inventory_units_vendor_id")
+  @@index([batch_id])
+  @@index([brand_id])
+  @@index([demo_customer_id], map: "inventory_units_demo_customer_id_fkey")
+  @@index([product_id, scan_code, status, created_at], map: "inventory_units_product_scan_status_created_idx")
+  @@index([sold_customer_id], map: "inventory_units_sold_customer_id_fkey")
+  @@index([sold_invoice_id], map: "inventory_units_sold_invoice_id_fkey")
+  @@index([vendor_id, product_id, scan_code], map: "inventory_units_vendor_product_scan_code_idx")
+  @@index([vendor_id, scan_code], map: "inventory_units_vendor_scan_code_idx")
+}
+
+model inventory_units_bulk_delete_audit {
+  id                     String   @id @db.Char(36)
+  vendor_id              String   @db.Char(36)
+  product_id             String   @db.Char(36)
+  scope                  String   @db.MediumText
+  total_units            Int
+  verified_units         Int
+  deleted_by_name        String   @db.MediumText
+  deleted_by_email       String?  @db.MediumText
+  deleted_by_user_id     String?  @db.Char(36)
+  is_admin_override      Boolean  @default(false)
+  filters                Json?
+  selected_ids           Json?
+  created_at             DateTime @default(now()) @db.DateTime(6)
+  deleted_units          Int?
+  skipped_verified_units Int?
+}
+
+model invoice_addresses {
+  id            String   @id @db.Char(36)
+  vendor_id     String   @db.Char(36)
+  label         String   @db.MediumText
+  name          String?  @db.MediumText
+  phone         String?  @db.MediumText
+  email         String?  @db.MediumText
+  gstin         String?  @db.MediumText
+  address_line1 String   @db.MediumText
+  address_line2 String?  @db.MediumText
+  city          String   @db.MediumText
+  state         String   @db.MediumText
+  pincode       String   @db.MediumText
+  country       String   @default("India") @db.VarChar(512)
+  created_at    DateTime @default(now()) @db.DateTime(6)
+  category      String?  @db.MediumText
+
+  @@index([vendor_id], map: "idx_invoice_addresses_vendor")
+}
+
+model invoice_batch_items {
+  id                String   @id @db.Char(36)
+  invoice_id        String   @db.Char(36)
+  batch_id          String   @db.Char(36)
+  batch_code        String   @db.VarChar(255)
+  product_id        String   @db.Char(36)
+  quantity          Int
+  unit_price        Decimal  @default(0.00) @db.Decimal(12, 2)
+  discount_per_unit Decimal  @default(0.00) @db.Decimal(12, 2)
+  discount_total    Decimal  @default(0.00) @db.Decimal(12, 2)
+  line_total        Decimal  @default(0.00) @db.Decimal(12, 2)
+  created_at        DateTime @default(now()) @db.DateTime(6)
+  updated_at        DateTime @default(now()) @db.DateTime(6)
+  batches           batches  @relation(fields: [batch_id], references: [id], onUpdate: NoAction)
+  invoices          invoices @relation(fields: [invoice_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  products          products @relation(fields: [product_id], references: [id], onUpdate: NoAction)
+
+  @@unique([invoice_id, batch_id], map: "invoice_batch_items_invoice_batch_unique")
+  @@index([batch_code])
+  @@index([batch_id])
+  @@index([invoice_id])
+  @@index([product_id])
+}
+
+model invoice_companies {
+  id             String     @id @db.Char(36)
+  key            String     @unique @db.VarChar(255)
+  display_name   String     @db.MediumText
+  legal_name     String?    @db.MediumText
+  address        String?    @db.MediumText
+  gst_number     String?    @db.MediumText
+  pan_number     String?    @db.MediumText
+  bank_name      String?    @db.MediumText
+  bank_branch    String?    @db.MediumText
+  account_number String?    @db.MediumText
+  ifsc_code      String?    @db.MediumText
+  swift_code     String?    @db.MediumText
+  upi_vpa        String?    @db.VarChar(255)
+  phone          String?    @db.MediumText
+  email          String?    @db.MediumText
+  created_at     DateTime   @default(now()) @db.DateTime(6)
+  invoices       invoices[]
+}
+
+model invoice_counters {
+  company_id String @db.Char(36)
+  year       Int
+  counter    Int    @default(0)
+
+  @@id([company_id, year])
+}
+
+model invoice_items {
+  id              String   @id @db.Char(36)
+  invoice_id      String   @db.Char(36)
+  description     String   @db.MediumText
+  hsn_sac         String?  @db.MediumText
+  quantity        Decimal  @default(1.00) @db.Decimal(12, 2)
+  unit_price      Decimal  @default(0.00) @db.Decimal(12, 2)
+  discount        Decimal  @default(0.00) @db.Decimal(12, 2)
+  tax_percent     Decimal  @default(0.00) @db.Decimal(5, 2)
+  line_subtotal   Decimal  @default(0.00) @db.Decimal(12, 2)
+  line_tax_amount Decimal  @default(0.00) @db.Decimal(12, 2)
+  line_total      Decimal  @default(0.00) @db.Decimal(12, 2)
+  position        Int      @default(0)
+  created_at      DateTime @default(now()) @db.DateTime(6)
+  updated_at      DateTime @default(now()) @db.DateTime(6)
+  product_id      String?  @db.Char(36)
+  brand           String?  @db.MediumText
+  hsn             String?  @db.MediumText
+  invoices        invoices @relation(fields: [invoice_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([invoice_id], map: "invoice_items_invoice_id_fkey")
+}
+
+model invoice_payments {
+  id         String   @id @db.Char(36)
+  invoice_id String   @db.Char(36)
+  amount     Decimal  @db.Decimal(12, 2)
+  method     String?  @db.MediumText
+  reference  String?  @db.MediumText
+  note       String?  @db.MediumText
+  paid_at    DateTime @default(dbgenerated("(curdate())")) @db.Date
+  created_by String?  @db.Char(36)
+  created_at DateTime @default(now()) @db.DateTime(6)
+  invoices   invoices @relation(fields: [invoice_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([invoice_id], map: "idx_invoice_payments_invoice")
+}
+
+model invoice_units {
+  id              String          @id @db.Char(36)
+  invoice_id      String          @db.Char(36)
+  unit_id         String          @unique(map: "invoice_units_unit_id_uniq") @db.Char(36)
+  unit_code       String          @unique(map: "invoice_units_unit_code_uniq") @db.VarChar(255)
+  product_id      String          @db.Char(36)
+  created_at      DateTime        @default(now()) @db.DateTime(6)
+  scan_code       String?         @db.VarChar(255)
+  invoices        invoices        @relation(fields: [invoice_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  products        products        @relation(fields: [product_id], references: [id], onUpdate: NoAction)
+  inventory_units inventory_units @relation(fields: [unit_id], references: [id], onUpdate: NoAction)
+
+  @@index([invoice_id])
+  @@index([invoice_id, scan_code], map: "invoice_units_invoice_scan_code_idx")
+  @@index([product_id])
+}
+
+model invoices {
+  id                  String                @id @db.Char(36)
+  company_id          String                @db.Char(36)
+  invoice_number      String                @unique @db.VarChar(255)
+  invoice_date        DateTime              @default(dbgenerated("(curdate())")) @db.Date
+  due_date            DateTime?             @db.Date
+  customer_name       String                @db.MediumText
+  billing_address     String?               @db.MediumText
+  phone               String?               @db.MediumText
+  email               String?               @db.MediumText
+  contact_person      String?               @db.MediumText
+  gst_number          String?               @db.MediumText
+  pan_number          String?               @db.MediumText
+  subtotal            Decimal               @default(0.00) @db.Decimal(12, 2)
+  tax_amount          Decimal               @default(0.00) @db.Decimal(12, 2)
+  total_amount        Decimal               @default(0.00) @db.Decimal(12, 2)
+  notes               String?               @db.MediumText
+  status              String                @default("DRAFT") @db.VarChar(512)
+  created_by          String?               @db.Char(36)
+  created_at          DateTime              @default(now()) @db.DateTime(6)
+  updated_at          DateTime              @default(now()) @db.DateTime(6)
+  tax_label           String?               @db.MediumText
+  is_custom           Boolean               @default(true)
+  bill_to_address_id  String?               @db.Char(36)
+  discount_total      Decimal?              @default(0.000000) @db.Decimal(20, 6)
+  tax_type            String?               @default("CGST_SGST") @db.VarChar(512)
+  cgst_percent        Decimal?              @default(0.000000) @db.Decimal(20, 6)
+  sgst_percent        Decimal?              @default(0.000000) @db.Decimal(20, 6)
+  igst_percent        Decimal?              @default(0.000000) @db.Decimal(20, 6)
+  cgst_amount         Decimal?              @default(0.000000) @db.Decimal(20, 6)
+  sgst_amount         Decimal?              @default(0.000000) @db.Decimal(20, 6)
+  igst_amount         Decimal?              @default(0.000000) @db.Decimal(20, 6)
+  grand_total         Decimal?              @db.Decimal(20, 6)
+  invoice_seq         BigInt?
+  amount_paid         Decimal               @default(0.00) @db.Decimal(12, 2)
+  payment_status      String                @default("UNPAID") @db.VarChar(512)
+  paid_at             DateTime?             @db.DateTime(6)
+  last_reminder_at    DateTime?             @db.DateTime(6)
+  deleted_at          DateTime?             @db.DateTime(6)
+  deleted_by          String?               @db.Char(36)
+  last_email_at       DateTime?             @db.DateTime(6)
+  inventory_units     inventory_units[]
+  invoice_batch_items invoice_batch_items[]
+  invoice_items       invoice_items[]
+  invoice_payments    invoice_payments[]
+  invoice_units       invoice_units[]
+  invoice_companies   invoice_companies     @relation(fields: [company_id], references: [id], onUpdate: NoAction)
+
+  @@index([deleted_at], map: "idx_invoices_deleted_at")
+  @@index([company_id], map: "invoices_company_id_fkey")
+}
+
+model k_partnership_videos {
+  country_code String   @id @db.VarChar(255)
+  storage_path String   @db.MediumText
+  created_at   DateTime @default(now()) @db.DateTime(6)
+  updated_at   DateTime @default(now()) @db.DateTime(6)
+}
+
+model membership_plans {
+  id            String   @id @db.Char(36)
+  code          String   @unique @db.VarChar(255)
+  name          String   @db.MediumText
+  description   String?  @db.MediumText
+  price         Decimal  @db.Decimal(10, 2)
+  duration_days Int      @default(90)
+  active        Boolean  @default(true)
+  created_at    DateTime @default(now()) @db.DateTime(6)
+  updated_at    DateTime @default(now()) @db.DateTime(6)
+}
+
+model notification_recipients {
+  id         String   @id @db.Char(36)
+  email      String   @unique(map: "notification_recipients_email_unique") @db.VarChar(255)
+  label      String?  @db.MediumText
+  active     Boolean  @default(true)
+  created_at DateTime @default(now()) @db.DateTime(6)
+  updated_at DateTime @default(now()) @db.DateTime(6)
+
+  @@index([active])
+}
+
+model order_attribution_items {
+  id                          BigInt       @id @default(autoincrement())
+  order_id                    String       @db.Char(36)
+  influencer_id               String       @db.Char(36)
+  promo_code_id               String?      @db.Char(36)
+  product_id                  String       @db.Char(36)
+  qty                         Int
+  unit_price                  Decimal      @db.Decimal(12, 2)
+  currency                    String       @default("INR") @db.VarChar(512)
+  effective_user_discount_pct Decimal      @default(0.00) @db.Decimal(5, 2)
+  effective_commission_pct    Decimal      @default(0.00) @db.Decimal(5, 2)
+  discount_amount             Decimal      @default(0.00) @db.Decimal(12, 2)
+  commission_amount           Decimal      @default(0.00) @db.Decimal(12, 2)
+  created_at                  DateTime     @default(now()) @db.DateTime(6)
+  orders                      orders       @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  products                    products     @relation(fields: [product_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  promo_codes                 promo_codes? @relation(fields: [promo_code_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([influencer_id], map: "idx_oai_influencer")
+  @@index([order_id], map: "idx_oai_order")
+  @@index([product_id], map: "idx_oai_product")
+  @@index([promo_code_id], map: "order_attribution_items_promo_code_id_fkey")
+}
+
+model order_attributions {
+  order_id            String          @id @db.Char(36)
+  influencer_id       String          @db.Char(36)
+  referral_id         String?         @db.Char(36)
+  promo_code_id       String?         @db.Char(36)
+  attributed_by       String          @db.MediumText
+  discount_percent    Decimal         @default(0.00) @db.Decimal(5, 2)
+  commission_percent  Decimal         @default(0.00) @db.Decimal(5, 2)
+  commission_amount   Decimal         @default(0.00) @db.Decimal(12, 2)
+  currency            String          @default("INR") @db.VarChar(512)
+  status              String          @default("approved") @db.VarChar(512)
+  created_at          DateTime        @default(now()) @db.DateTime(6)
+  user_discount_total Decimal         @default(0.00) @db.Decimal(12, 2)
+  commission_total    Decimal         @default(0.00) @db.Decimal(12, 2)
+  orders              orders          @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  promo_codes         promo_codes?    @relation(fields: [promo_code_id], references: [id], onUpdate: NoAction)
+  referral_links      referral_links? @relation(fields: [referral_id], references: [id], onUpdate: NoAction)
+
+  @@index([influencer_id, created_at], map: "idx_oa_influencer_created")
+  @@index([influencer_id], map: "idx_order_attr_influencer")
+  @@index([promo_code_id], map: "order_attributions_promo_code_id_fkey")
+  @@index([referral_id], map: "order_attributions_referral_id_fkey")
+}
+
+model order_items {
+  id              String    @id @db.Char(36)
+  order_id        String    @db.Char(36)
+  product_id      String?   @db.Char(36)
+  sku             String?   @db.MediumText
+  name            String    @db.MediumText
+  hero_image_path String?   @db.MediumText
+  unit_price      Decimal   @db.Decimal(12, 2)
+  mrp             Decimal?  @db.Decimal(12, 2)
+  quantity        Int       @default(1)
+  line_total      Decimal   @db.Decimal(12, 2)
+  created_at      DateTime  @default(now()) @db.DateTime(6)
+  orders          orders    @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  products        products? @relation(fields: [product_id], references: [id], onUpdate: NoAction)
+
+  @@index([order_id], map: "order_items_order_idx")
+  @@index([product_id], map: "order_items_product_id_fkey")
+}
+
+model orders {
+  id                      String                    @id @db.Char(36)
+  user_id                 String                    @db.Char(36)
+  order_number            String?                   @unique @db.VarChar(255)
+  status                  String                    @default("pending_payment") @db.VarChar(255)
+  currency                String                    @default("INR") @db.VarChar(512)
+  subtotal                Decimal                   @default(0.00) @db.Decimal(12, 2)
+  shipping_fee            Decimal                   @default(0.00) @db.Decimal(12, 2)
+  discount_total          Decimal                   @default(0.00) @db.Decimal(12, 2)
+  total                   Decimal                   @default(0.00) @db.Decimal(12, 2)
+  shipping_address_id     String?                   @db.Char(36)
+  created_at              DateTime                  @default(now()) @db.DateTime(6)
+  updated_at              DateTime                  @default(now()) @db.DateTime(6)
+  address_snapshot        Json?
+  notes                   String?                   @db.MediumText
+  promo_code_id           String?                   @db.Char(36)
+  promo_snapshot          Json                      @default(dbgenerated("(cast(_utf8mb4\\'{}\\' as json))"))
+  payment_provider        String?                   @db.MediumText
+  payment_reference       String?                   @db.MediumText
+  payment_meta            Json?
+  paid_at                 DateTime?                 @db.DateTime(6)
+  fx_rate_snapshot        Decimal?                  @db.Decimal(20, 6)
+  subtotal_inr            Decimal?                  @db.Decimal(20, 6)
+  shipping_fee_inr        Decimal?                  @db.Decimal(20, 6)
+  discount_total_inr      Decimal?                  @db.Decimal(20, 6)
+  total_inr               Decimal?                  @db.Decimal(20, 6)
+  recipient_locale        String?                   @db.MediumText
+  dtdc_shipments          dtdc_shipments[]
+  inventory_units         inventory_units[]
+  order_attribution_items order_attribution_items[]
+  order_attributions      order_attributions?
+  order_items             order_items[]
+  promo_codes             promo_codes?              @relation(fields: [promo_code_id], references: [id], onUpdate: NoAction)
+  addresses               addresses?                @relation(fields: [shipping_address_id], references: [id], onUpdate: NoAction)
+  profiles                profiles                  @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  payment_orders          payment_orders[]
+  payments                payments[]
+
+  @@index([created_at, status], map: "idx_orders_created_status")
+  @@index([promo_code_id], map: "idx_orders_promo_code_id")
+  @@index([created_at], map: "orders_created_idx")
+  @@index([shipping_address_id], map: "orders_shipping_address_id_fkey")
+  @@index([user_id], map: "orders_user_idx")
+}
+
+model password_reset_tokens {
+  id         BigInt    @id @default(autoincrement())
+  email      String    @db.VarChar(255)
+  token_hash String    @db.VarChar(255)
+  expires_at DateTime  @db.DateTime(6)
+  used_at    DateTime? @db.DateTime(6)
+  created_at DateTime  @default(now()) @db.DateTime(6)
+
+  @@index([email], map: "idx_password_reset_tokens_email")
+  @@index([token_hash], map: "idx_password_reset_tokens_token_hash")
+}
+
+model payment_orders {
+  id                String   @id @db.Char(36)
+  order_id          String   @db.Char(36)
+  provider          String   @default("razorpay") @db.VarChar(512)
+  provider_order_id String?  @unique @db.VarChar(255)
+  amount            Decimal  @db.Decimal(12, 2)
+  currency          String   @default("INR") @db.VarChar(512)
+  status            String   @default("created") @db.VarChar(512)
+  receipt           String?  @db.MediumText
+  created_at        DateTime @default(now()) @db.DateTime(6)
+  orders            orders   @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([order_id], map: "payment_orders_order_idx")
+}
+
+model payments {
+  id                  String    @id @db.Char(36)
+  order_id            String    @db.Char(36)
+  provider            String    @default("razorpay") @db.VarChar(512)
+  provider_payment_id String?   @unique @db.VarChar(255)
+  provider_order_id   String?   @db.MediumText
+  method              String?   @db.MediumText
+  status              String    @default("captured") @db.VarChar(512)
+  amount              Decimal   @db.Decimal(12, 2)
+  currency            String    @default("INR") @db.VarChar(512)
+  signature           String?   @db.MediumText
+  raw                 Json?
+  created_at          DateTime  @default(now()) @db.DateTime(6)
+  captured_at         DateTime? @default(now()) @db.DateTime(6)
+  orders              orders    @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([order_id], map: "payments_order_idx")
+}
+
+model pincode_serviceability_cache {
+  pincode         String   @id @db.VarChar(255)
+  serviceable     Boolean
+  eta_days_min    Int?
+  eta_days_max    Int?
+  payload         Json?
+  last_checked_at DateTime @default(now()) @db.DateTime(6)
+  source          String   @default("shipsy") @db.VarChar(512)
+}
+
+model pincodes {
+  pincode        String         @id @db.VarChar(255)
+  place_name     String         @db.MediumText
+  district       String?        @db.MediumText
+  state          String         @db.VarChar(255)
+  zone           String         @db.VarChar(255)
+  created_at     DateTime       @default(now()) @db.DateTime(6)
+  shipping_zones shipping_zones @relation(fields: [zone], references: [zone], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([state])
+  @@index([zone])
+}
+
+model product_country_prices {
+  id           String   @id @db.Char(36)
+  product_id   String   @db.Char(36)
+  country_code String   @db.VarChar(255)
+  offer_price  Decimal  @db.Decimal(12, 2)
+  is_active    Boolean  @default(true)
+  created_at   DateTime @default(now()) @db.DateTime(6)
+  updated_at   DateTime @default(now()) @db.DateTime(6)
+  products     products @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([product_id, country_code])
+  @@index([country_code, is_active], map: "idx_pcp_country_active")
+  @@index([product_id], map: "idx_pcp_product")
+}
+
+model product_reviews {
+  id                   String         @id @db.Char(36)
+  product_id           String         @db.Char(36)
+  user_id              String?        @db.Char(36)
+  rating               Int            @db.SmallInt
+  title                String?        @db.MediumText
+  body                 String?        @db.MediumText
+  photos               Json?          @default(dbgenerated("(cast(_utf8mb4\\'[]\\' as json))"))
+  is_verified_purchase Boolean        @default(false)
+  status               String         @default("published") @db.VarChar(255)
+  helpful_count        Int            @default(0)
+  reported_count       Int            @default(0)
+  created_at           DateTime       @default(now()) @db.DateTime(6)
+  updated_at           DateTime       @default(now()) @db.DateTime(6)
+  display_name         String?        @db.MediumText
+  avatar_url           String?        @db.MediumText
+  country              String?        @db.VarChar(255)
+  products             products       @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  review_votes         review_votes[]
+
+  @@unique([product_id, user_id], map: "uq_user_review_per_product")
+  @@index([country], map: "idx_product_reviews_country")
+  @@index([product_id, country], map: "idx_product_reviews_product_country")
+  @@index([product_id, status, created_at], map: "idx_reviews_product_status_created")
+  @@index([rating], map: "idx_reviews_rating")
+  @@index([user_id], map: "idx_reviews_user")
+}
+
+model product_story_blocks {
+  id                 String   @id @db.Char(36)
+  product_id         String   @db.Char(36)
+  position           Int
+  block_type         String   @db.MediumText
+  size               String   @default("2x1") @db.VarChar(512)
+  mode               String   @default("A") @db.VarChar(512)
+  headline           String?  @db.MediumText
+  body               String?  @db.MediumText
+  text_position      String?  @default("bottom-left") @db.VarChar(512)
+  text_color         String?  @default("light") @db.VarChar(512)
+  split_direction    String?  @default("image-left") @db.VarChar(512)
+  image_path         String?  @db.MediumText
+  image_alt          String?  @db.MediumText
+  caption            String?  @db.MediumText
+  stats_items        Json?
+  before_image_path  String?  @db.MediumText
+  after_image_path   String?  @db.MediumText
+  comparison_caption String?  @db.MediumText
+  created_at         DateTime @default(now()) @db.DateTime(6)
+  updated_at         DateTime @default(now()) @db.DateTime(6)
+  text_size          String?  @default("md") @db.VarChar(512)
+  image_focal_x      Decimal? @db.Decimal(20, 6)
+  image_focal_y      Decimal? @db.Decimal(20, 6)
+  text_bg            String?  @db.MediumText
+  image_fit          String?  @default("cover") @db.VarChar(512)
+  image_zoom         Decimal? @default(1.000000) @db.Decimal(20, 6)
+  image_bg           String?  @db.MediumText
+  caption_mode       String?  @default("always") @db.VarChar(512)
+  caption_backdrop   Boolean  @default(false)
+  text_weight        String?  @default("bold") @db.VarChar(512)
+  products           products @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([product_id, position], map: "idx_psb_product_position")
+}
+
+model product_translations {
+  id                    String   @id @db.Char(36)
+  product_id            String   @db.Char(36)
+  locale                String   @db.VarChar(255)
+  short_description     String?  @db.MediumText
+  description           String?  @db.MediumText
+  ingredients_md        String?  @db.MediumText
+  additional_details_md String?  @db.MediumText
+  key_features_md       String?  @db.MediumText
+  box_contents_md       String?  @db.MediumText
+  faq                   Json?
+  key_benefits          Json?
+  additional_details    Json?
+  source_hash           String?  @db.MediumText
+  source                String   @default("ai") @db.VarChar(512)
+  created_at            DateTime @default(now()) @db.DateTime(6)
+  updated_at            DateTime @default(now()) @db.DateTime(6)
+  products              products @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([product_id, locale])
+  @@index([product_id, locale], map: "product_translations_lookup")
+}
+
+model product_videos {
+  id             String   @id @db.Char(36)
+  product_id     String   @db.Char(36)
+  storage_path   String   @db.VarChar(255)
+  thumbnail_path String?  @db.MediumText
+  alt            String?  @db.MediumText
+  sort_order     Int      @default(0)
+  created_at     DateTime @default(now()) @db.DateTime(6)
+  products       products @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([product_id, storage_path], map: "product_videos_storage_path_uniq")
+  @@index([product_id, sort_order], map: "product_videos_product_id_sort_idx")
+}
+
+model profiles {
+  id                                               String               @id @db.Char(36)
+  full_name                                        String?              @db.MediumText
+  avatar_url                                       String?              @db.MediumText
+  created_at                                       DateTime?            @default(now()) @db.DateTime(6)
+  updated_at                                       DateTime?            @default(now()) @db.DateTime(6)
+  phone                                            String?              @db.MediumText
+  default_address_id                               String?              @db.Char(36)
+  role                                             String               @default("customer") @db.VarChar(512)
+  tracking_consent                                 Boolean              @default(true)
+  preferred_locale                                 String?              @db.VarChar(255)
+  preferred_country                                String?              @db.MediumText
+  email_verified_at                                DateTime?            @db.DateTime(6)
+  email_verification_grace_starts_at               DateTime?            @db.DateTime(6)
+  email_verification_deadline_override             DateTime?            @db.DateTime(6)
+  addresses_addresses_user_idToprofiles            addresses[]          @relation("addresses_user_idToprofiles")
+  campaigns                                        campaigns[]
+  carts                                            carts?
+  instagram_accounts                               instagram_accounts[]
+  orders                                           orders[]
+  addresses_profiles_default_address_idToaddresses addresses?           @relation("profiles_default_address_idToaddresses", fields: [default_address_id], references: [id], onUpdate: NoAction, map: "profiles_default_address_fkey")
+  vendor_members                                   vendor_members[]
+  vendors_vendors_approved_byToprofiles            vendors[]            @relation("vendors_approved_byToprofiles")
+  vendors_vendors_owner_profile_idToprofiles       vendors[]            @relation("vendors_owner_profile_idToprofiles")
+  wishlist_items                                   wishlist_items[]
+
+  @@index([email_verified_at], map: "idx_profiles_email_verified_at")
+  @@index([default_address_id], map: "profiles_default_address_fkey")
+  @@index([preferred_locale])
+}
+
+model promo_codes {
+  id                      String                    @id @db.Char(36)
+  influencer_id           String                    @db.Char(36)
+  code                    String                    @unique @db.VarChar(255)
+  product_id              String?                   @db.Char(36)
+  discount_percent        Decimal                   @default(0.00) @db.Decimal(5, 2)
+  commission_percent      Decimal                   @default(0.00) @db.Decimal(5, 2)
+  cap_percent             Decimal                   @db.Decimal(5, 2)
+  starts_at               DateTime?                 @default(now()) @db.DateTime(6)
+  expires_at              DateTime?                 @db.DateTime(6)
+  max_uses                Int?
+  uses                    Int                       @default(0)
+  active                  Boolean                   @default(true)
+  created_at              DateTime                  @default(now()) @db.DateTime(6)
+  scope                   String                    @default("global") @db.VarChar(512)
+  order_attribution_items order_attribution_items[]
+  order_attributions      order_attributions[]
+  orders                  orders[]
+  products                products?                 @relation(fields: [product_id], references: [id], onUpdate: NoAction)
+
+  @@index([code], map: "idx_promo_codes_code")
+  @@index([product_id], map: "promo_codes_product_id_fkey")
+}
+
+model referral_clicks {
+  id             BigInt         @id @default(autoincrement())
+  referral_id    String         @db.Char(36)
+  clicked_at     DateTime       @default(now()) @db.DateTime(6)
+  viewer_user_id String?        @db.Char(36)
+  session_id     String?        @db.Char(36)
+  user_agent     String?        @db.MediumText
+  ip_hash        String?        @db.MediumText
+  meta           Json?          @default(dbgenerated("(cast(_utf8mb4\\'{}\\' as json))"))
+  referral_links referral_links @relation(fields: [referral_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([clicked_at], map: "idx_referral_clicks_clicked_at")
+  @@index([referral_id], map: "idx_referral_clicks_ref")
+}
+
+model referral_links {
+  id                 String               @id @db.Char(36)
+  influencer_id      String               @db.Char(36)
+  link_type          String               @default("product") @db.VarChar(512)
+  product_id         String?              @db.Char(36)
+  code               String               @unique @db.VarChar(255)
+  discount_percent   Decimal              @default(0.00) @db.Decimal(5, 2)
+  commission_percent Decimal              @default(0.00) @db.Decimal(5, 2)
+  cap_percent        Decimal              @db.Decimal(5, 2)
+  expires_at         DateTime?            @db.DateTime(6)
+  max_uses           Int?
+  uses               Int                  @default(0)
+  active             Boolean              @default(true)
+  created_at         DateTime             @default(now()) @db.DateTime(6)
+  order_attributions order_attributions[]
+  referral_clicks    referral_clicks[]
+  products           products?            @relation(fields: [product_id], references: [id], onUpdate: NoAction)
+
+  @@index([product_id], map: "referral_links_product_id_fkey")
+}
+
+model review_votes {
+  review_id       String          @db.Char(36)
+  user_id         String          @db.Char(36)
+  is_helpful      Boolean
+  created_at      DateTime        @default(now()) @db.DateTime(6)
+  product_reviews product_reviews @relation(fields: [review_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([review_id, user_id])
+}
+
+model role_grants {
+  user_id String @id @db.Char(36)
+  role    String @db.MediumText
+}
+
+model shipping_zones {
+  zone         String     @id @db.VarChar(255)
+  label        String     @db.MediumText
+  eta_days_min Int
+  eta_days_max Int
+  sort_order   Int        @default(0)
+  updated_at   DateTime   @default(now()) @db.DateTime(6)
+  updated_by   String?    @db.Char(36)
+  pincodes     pincodes[]
+}
+
+model social_scheduled_posts {
+  id            String    @id @db.Char(36)
+  owner_id      String    @db.Char(36)
+  platform      String    @db.MediumText
+  message       String?   @db.MediumText
+  media_url     String?   @db.MediumText
+  media_type    String?   @db.MediumText
+  scheduled_at  DateTime  @db.DateTime(6)
+  status        String    @default("pending") @db.VarChar(255)
+  last_error    String?   @db.MediumText
+  posted_at     DateTime? @db.DateTime(6)
+  fb_post_id    String?   @db.MediumText
+  ig_media_id   String?   @db.MediumText
+  created_at    DateTime  @default(now()) @db.DateTime(6)
+  updated_at    DateTime  @default(now()) @db.DateTime(6)
+  channel       String?   @db.MediumText
+  payload       Json      @default(dbgenerated("(cast(_utf8mb4\\'{}\\' as json))"))
+  error_message String?   @db.MediumText
+
+  @@index([status, scheduled_at], map: "social_scheduled_posts_pending_idx")
+  @@index([status, scheduled_at], map: "social_scheduled_posts_status_scheduled_idx")
+}
+
+model social_schedules {
+  id           String   @id @db.Char(36)
+  owner_id     String   @db.Char(36)
+  platform     String   @db.MediumText
+  message      String?  @db.MediumText
+  media_url    String?  @db.MediumText
+  media_type   String?  @db.MediumText
+  scheduled_at DateTime @db.DateTime(6)
+  status       String   @default("pending") @db.VarChar(255)
+  last_error   String?  @db.MediumText
+  created_at   DateTime @default(now()) @db.DateTime(6)
+  updated_at   DateTime @default(now()) @db.DateTime(6)
+
+  @@index([owner_id], map: "idx_social_schedules_owner")
+  @@index([status, scheduled_at], map: "idx_social_schedules_status_time")
+}
+
+model store_credits {
+  id         String    @id @db.Char(36)
+  user_id    String    @db.Char(36)
+  code       String    @unique @db.VarChar(255)
+  amount     Decimal   @db.Decimal(12, 2)
+  balance    Decimal   @db.Decimal(12, 2)
+  currency   String?   @default("INR") @db.VarChar(512)
+  expires_at DateTime? @db.DateTime(6)
+  status     String?   @default("active") @db.VarChar(512)
+  created_at DateTime? @default(now()) @db.DateTime(6)
+}
+
+model store_settings {
+  id                              Int      @id @default(1) @db.SmallInt
+  delivery_threshold              Int      @default(2000)
+  default_shipping_fee            Int      @default(149)
+  updated_at                      DateTime @default(now()) @db.DateTime(6)
+  updated_by                      String?  @db.Char(36)
+  legal_entity_name               String?  @db.MediumText
+  registered_address              String?  @db.MediumText
+  public_phone                    String?  @db.MediumText
+  support_email                   String?  @db.MediumText
+  business_hours                  String?  @db.MediumText
+  grievance_officer_name          String?  @db.MediumText
+  grievance_officer_designation   String?  @db.MediumText
+  grievance_officer_email         String?  @db.MediumText
+  gstin                           String?  @db.MediumText
+  cdsco_registration              String?  @db.MediumText
+  jurisdiction_city               String?  @db.MediumText
+  marketplace_disclosure_enabled  Boolean  @default(false)
+  home_video_limit                Int      @default(16)
+  commission_auto_approve_days    Int      @default(0)
+  intl_packaging_tare_pct         Int      @default(15) @db.SmallInt
+  intl_buffer_pct                 Int      @default(20) @db.SmallInt
+  intl_max_shipping_weight_kg     Int      @default(20) @db.SmallInt
+  k_partnership_default_country   String?  @db.MediumText
+  brand_legal_entity_name         String?  @db.MediumText
+  brand_registered_address        String?  @db.MediumText
+  brand_country_code              String?  @db.MediumText
+  partner_role_label              String   @default("Authorized Importer & Distribution Partner") @db.VarChar(512)
+  email_verification_grace_days   Int      @default(7)
+  email_verification_lockout_days Int      @default(30)
+  cookie_consent_delay_seconds    Int      @default(7)
+  cookie_consent_scroll_threshold Int      @default(1)
+  brand_email                     String?  @db.MediumText
+}
+
+model user_memberships {
+  id            String   @id @db.Char(36)
+  user_id       String   @db.Char(36)
+  plan_code     String   @default("k_plus") @db.VarChar(512)
+  plan_name     String   @default("K-Plus") @db.VarChar(512)
+  amount        Decimal  @default(199.00) @db.Decimal(10, 2)
+  duration_days Int      @default(90)
+  status        String   @default("active") @db.VarChar(255)
+  starts_at     DateTime @default(now()) @db.DateTime(6)
+  ends_at       DateTime @db.DateTime(6)
+  payment_id    String?  @db.MediumText
+  order_id      String?  @db.MediumText
+  created_at    DateTime @default(now()) @db.DateTime(6)
+  updated_at    DateTime @default(now()) @db.DateTime(6)
+
+  @@index([user_id, status, ends_at], map: "user_memberships_user_status_idx")
+}
+
+model vendor_members {
+  vendor_id  String   @db.Char(36)
+  user_id    String   @db.Char(36)
+  role       String   @default("owner") @db.VarChar(512)
+  created_at DateTime @default(now()) @db.DateTime(6)
+  profiles   profiles @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  vendors    vendors  @relation(fields: [vendor_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([vendor_id, user_id])
+  @@index([user_id], map: "vendor_members_user_idx")
+}
+
+model vendors {
+  id                                          String           @id @db.Char(36)
+  owner_profile_id                            String           @db.Char(36)
+  display_name                                String           @db.MediumText
+  legal_name                                  String?          @db.MediumText
+  slug                                        String?          @unique @db.VarChar(255)
+  email                                       String?          @db.MediumText
+  phone                                       String?          @db.MediumText
+  gstin                                       String?          @db.MediumText
+  website                                     String?          @db.MediumText
+  address_json                                Json?
+  status                                      String           @default("pending") @db.VarChar(512)
+  rejected_reason                             String?          @db.MediumText
+  approved_by                                 String?          @db.Char(36)
+  approved_at                                 DateTime?        @db.DateTime(6)
+  created_at                                  DateTime         @default(now()) @db.DateTime(6)
+  updated_at                                  DateTime         @default(now()) @db.DateTime(6)
+  commission_rate                             Decimal          @default(0.00) @db.Decimal(5, 2)
+  expiry_alert_days                           Int              @default(180)
+  customers                                   customers[]
+  products                                    products[]
+  vendor_members                              vendor_members[]
+  profiles_vendors_approved_byToprofiles      profiles?        @relation("vendors_approved_byToprofiles", fields: [approved_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  profiles_vendors_owner_profile_idToprofiles profiles         @relation("vendors_owner_profile_idToprofiles", fields: [owner_profile_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([approved_by], map: "vendors_approved_by_fkey")
+  @@index([owner_profile_id], map: "vendors_owner_idx")
+}
+
+model whatsapp_campaign_messages {
+  id                  String             @id @db.Char(36)
+  campaign_id         String             @db.Char(36)
+  contact_id          String             @db.Char(36)
+  to_phone            String             @db.MediumText
+  status              String             @default("queued") @db.VarChar(64)
+  provider_message_id String?            @db.MediumText
+  error_message       String?            @db.MediumText
+  sent_at             DateTime?          @db.DateTime(6)
+  delivered_at        DateTime?          @db.DateTime(6)
+  read_at             DateTime?          @db.DateTime(6)
+  created_at          DateTime           @default(now()) @db.DateTime(6)
+  updated_at          DateTime           @default(now()) @db.DateTime(6)
+  whatsapp_campaigns  whatsapp_campaigns @relation(fields: [campaign_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  whatsapp_contacts   whatsapp_contacts  @relation(fields: [contact_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([campaign_id, contact_id], map: "whatsapp_campaign_messages_unique_contact")
+  @@index([campaign_id])
+  @@index([contact_id], map: "whatsapp_campaign_messages_contact_id_fkey")
+  @@index([status])
+}
+
+model whatsapp_campaigns {
+  id                         String                       @id @db.Char(36)
+  name                       String                       @db.MediumText
+  template_id                String                       @db.Char(36)
+  status                     String                       @default("draft") @db.VarChar(64)
+  filter_tags                Json?
+  target_segment_description String?                      @db.MediumText
+  total_target_count         Int?
+  scheduled_at               DateTime?                    @db.DateTime(6)
+  started_at                 DateTime?                    @db.DateTime(6)
+  completed_at               DateTime?                    @db.DateTime(6)
+  created_by                 String?                      @db.Char(36)
+  created_at                 DateTime                     @default(now()) @db.DateTime(6)
+  updated_at                 DateTime                     @default(now()) @db.DateTime(6)
+  audience_mode              String?                      @db.MediumText
+  sending_mode               String?                      @db.MediumText
+  whatsapp_campaign_messages whatsapp_campaign_messages[]
+  whatsapp_templates         whatsapp_templates           @relation(fields: [template_id], references: [id], onUpdate: NoAction)
+
+  @@index([status])
+  @@index([template_id], map: "whatsapp_campaigns_template_id_fkey")
+}
+
+model whatsapp_contacts {
+  id                         String                       @id @db.Char(36)
+  full_name                  String?                      @db.MediumText
+  phone_e164                 String                       @unique(map: "whatsapp_contacts_phone_unique") @db.VarChar(255)
+  country_code               String?                      @db.MediumText
+  tags                       Json?                        @default(dbgenerated("(cast(_utf8mb4\\'[]\\' as json))"))
+  created_by                 String?                      @db.Char(36)
+  created_at                 DateTime                     @default(now()) @db.DateTime(6)
+  updated_at                 DateTime                     @default(now()) @db.DateTime(6)
+  whatsapp_campaign_messages whatsapp_campaign_messages[]
+}
+
+model whatsapp_templates {
+  id                     String               @id @db.Char(36)
+  name                   String               @db.MediumText
+  provider_template_name String               @db.MediumText
+  category               String               @db.MediumText
+  language_code          String               @default("en") @db.VarChar(512)
+  header                 String?              @db.MediumText
+  body                   String?              @db.MediumText
+  body_preview           String?              @db.MediumText
+  example_variables      Json?                @default(dbgenerated("(cast(_utf8mb4\\'[]\\' as json))"))
+  is_active              Boolean              @default(true)
+  created_by             String?              @db.Char(36)
+  created_at             DateTime             @default(now()) @db.DateTime(6)
+  updated_at             DateTime             @default(now()) @db.DateTime(6)
+  whatsapp_campaigns     whatsapp_campaigns[]
+}
+
+model wishlist_items {
+  id         String   @id @db.Char(36)
+  user_id    String   @db.Char(36)
+  product_id String   @db.Char(36)
+  note       String?  @db.MediumText
+  priority   Int      @default(3)
+  created_at DateTime @default(now()) @db.DateTime(6)
+  updated_at DateTime @default(now()) @db.DateTime(6)
+  products   products @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  profiles   profiles @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([user_id, product_id], map: "wishlist_user_product_uniq")
+  @@index([product_id], map: "wishlist_product_idx")
+  @@index([user_id], map: "wishlist_user_idx")
+}
+
+// ── NextAuth (Auth.js) models — HAND-MAINTAINED, @map to the auth_* tables.
+// Do NOT run `prisma db pull` without re-adding these: introspection would
+// regenerate them as snake_case and break the adapter's expected field names.
+model User {
+  id            String    @id @default(uuid()) @db.Char(36)
+  name          String?   @db.VarChar(255)
+  email         String?   @unique @db.VarChar(255)
+  emailVerified DateTime? @map("email_verified") @db.DateTime(6)
+  image         String?   @db.VarChar(1024)
+  passwordHash  String?   @map("password_hash") @db.VarChar(255)
+  createdAt     DateTime  @default(now()) @map("created_at") @db.DateTime(6)
+  accounts      Account[]
+  sessions      Session[]
+
+  @@map("auth_users")
+}
+
+model Account {
+  id                String  @id @default(uuid()) @db.Char(36)
+  userId            String  @map("user_id") @db.Char(36)
+  type              String  @db.VarChar(255)
+  provider          String  @db.VarChar(255)
+  providerAccountId String  @map("provider_account_id") @db.VarChar(255)
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String? @db.VarChar(255)
+  scope             String? @db.VarChar(255)
+  id_token          String? @db.Text
+  session_state     String? @db.VarChar(255)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("auth_accounts")
+}
+
+model Session {
+  id           String   @id @default(uuid()) @db.Char(36)
+  sessionToken String   @unique @map("session_token") @db.VarChar(255)
+  userId       String   @map("user_id") @db.Char(36)
+  expires      DateTime @db.DateTime(6)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("auth_sessions")
+}
+
+model VerificationToken {
+  identifier String   @db.VarChar(255)
+  token      String   @db.VarChar(255)
+  expires    DateTime @db.DateTime(6)
+
+  @@unique([identifier, token])
+  @@map("auth_verification_tokens")
+}
+
+// Per-vendor fulfillment of a (shared, storefront) order. An order can contain
+// items from multiple vendors; each vendor dispatches its own slice. App-scoped
+// by vendor_id (no FKs — kept additive/independent of the shared orders table).
+model vendor_order_fulfillment {
+  id              String    @id @db.Char(36)
+  order_id        String    @db.Char(36)
+  vendor_id       String    @db.Char(36)
+  status          String    @default("PENDING") @db.VarChar(32)
+  courier         String?   @db.VarChar(255)
+  tracking_number String?   @db.VarChar(255)
+  tracking_url    String?   @db.VarChar(1024)
+  dispatched_at   DateTime? @db.DateTime(6)
+  delivered_at    DateTime? @db.DateTime(6)
+  notes           String?   @db.MediumText
+  created_at      DateTime  @default(now()) @db.DateTime(6)
+  updated_at      DateTime  @default(now()) @db.DateTime(6)
+
+  @@unique([order_id, vendor_id], map: "uq_vof_order_vendor")
+  @@index([vendor_id], map: "idx_vof_vendor")
+  @@map("vendor_order_fulfillment")
+}
+
+// Per-vendor activity / audit trail (who changed what, when). Best-effort writes
+// from the mutating endpoints; never blocks the operation. App-scoped by vendor_id.
+model vendor_activity_log {
+  id            String   @id @db.Char(36)
+  vendor_id     String   @db.Char(36)
+  actor_user_id String?  @db.Char(36)
+  actor_email   String?  @db.VarChar(255)
+  action        String   @db.VarChar(64)
+  entity_type   String?  @db.VarChar(48)
+  entity_id     String?  @db.Char(36)
+  summary       String?  @db.VarChar(512)
+  meta          Json?
+  created_at    DateTime @default(now()) @db.DateTime(6)
+
+  @@index([vendor_id, created_at], map: "idx_val_vendor_created")
+  @@index([entity_type, entity_id], map: "idx_val_entity")
+  @@map("vendor_activity_log")
+}

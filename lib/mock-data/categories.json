@@ -1,0 +1,90 @@
+[
+  {
+    "id": "cat_skincare",
+    "name": "Skincare",
+    "slug": "skincare",
+    "parent_id": null,
+    "position": 1,
+    "template": 1,
+    "image": "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=800",
+    "description": "Discover Korean skincare products for glowing, healthy skin",
+    "hero_banners": [
+      {
+        "id": "banner_skincare_1",
+        "image": "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=1920",
+        "alt": "Premium Korean Skincare",
+        "link_url": "/c/skincare",
+        "position": 1,
+        "page_scope": "category:cat_skincare",
+        "active": true
+      }
+    ],
+    "seo": {
+      "meta_title": "Korean Skincare Products | Made Korea",
+      "meta_description": "Shop the best Korean skincare products for radiant, healthy skin",
+      "keywords": [
+        "korean skincare",
+        "Consumer Innovations",
+        "skincare routine"
+      ]
+    }
+  },
+  {
+    "id": "cat_makeup",
+    "name": "Makeup",
+    "slug": "makeup",
+    "parent_id": null,
+    "position": 2,
+    "template": 2,
+    "image": "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=800",
+    "description": "Premium Korean makeup for flawless beauty",
+    "hero_banners": [
+      {
+        "id": "banner_makeup_1",
+        "image": "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=1920",
+        "alt": "Korean Makeup Collection",
+        "link_url": "/c/makeup",
+        "position": 1,
+        "page_scope": "category:cat_makeup",
+        "active": true
+      }
+    ],
+    "seo": {
+      "meta_title": "Korean Makeup Products | Made Korea",
+      "meta_description": "Discover premium Korean makeup for a flawless look",
+      "keywords": ["korean makeup", "Consumer Innovations makeup", "cosmetics"]
+    }
+  },
+  {
+    "id": "cat_baby",
+    "name": "Baby",
+    "slug": "baby",
+    "parent_id": null,
+    "position": 3,
+    "template": 1,
+    "image": "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=800",
+    "description": "Gentle and safe baby care products",
+    "hero_banners": [],
+    "seo": {
+      "meta_title": "Baby Care Products | Made Korea",
+      "meta_description": "Safe and gentle Korean baby care products",
+      "keywords": ["baby care", "baby products", "korean baby"]
+    }
+  },
+  {
+    "id": "cat_life_home",
+    "name": "Life & Home",
+    "slug": "life-home",
+    "parent_id": null,
+    "position": 4,
+    "template": 1,
+    "image": "https://images.unsplash.com/photo-1484101403633-562f891dc89a?w=800",
+    "description": "Lifestyle and home products from Korea",
+    "hero_banners": [],
+    "seo": {
+      "meta_title": "Life & Home Products | Made Korea",
+      "meta_description": "Korean lifestyle and home essentials",
+      "keywords": ["home products", "lifestyle", "korean home"]
+    }
+  }
+]

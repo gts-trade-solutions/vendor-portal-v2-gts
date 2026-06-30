@@ -1,0 +1,57 @@
+[
+  {
+    "id": "banner_home_1",
+    "image": "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=1920&h=800&fit=crop",
+    "alt": "Discover Consumer Innovations - Premium Korean Skincare",
+    "link_url": "/c/skincare",
+    "position": 1,
+    "page_scope": "home",
+    "active": true
+  },
+  {
+    "id": "banner_home_2",
+    "image": "https://images.unsplash.com/photo-1556228841-a5f7c5c3b39f?w=1920&h=800&fit=crop",
+    "alt": "New Arrivals - Fresh Beauty Products",
+    "link_url": "/search?filter=new_arrival",
+    "position": 2,
+    "page_scope": "home",
+    "active": true
+  },
+  {
+    "id": "banner_home_3",
+    "image": "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=1920&h=800&fit=crop",
+    "alt": "Korean Makeup - Flawless Beauty",
+    "link_url": "/c/makeup",
+    "position": 3,
+    "page_scope": "home",
+    "active": true
+  },
+  {
+    "id": "banner_home_4",
+    "image": "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=1920&h=800&fit=crop",
+    "alt": "Natural Beauty from Jeju Island",
+    "link_url": "/brand/innisfree",
+    "position": 4,
+    "page_scope": "home",
+    "active": true
+  },
+  {
+    "id": "banner_home_5",
+    "image": "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=1920&h=800&fit=crop",
+    "alt": "Best Sellers - Top Rated Products",
+    "link_url": "/search?filter=bestseller",
+    "position": 5,
+    "page_scope": "home",
+    "active": true
+  },
+  {
+    "id": "banner_video_home",
+    "video_url": "https://www.w3schools.com/html/mov_bbb.mp4",
+    "image": "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=1920&h=1080&fit=crop",
+    "alt": "Experience Korean Beauty Revolution",
+    "link_url": "/c/skincare",
+    "position": 1,
+    "page_scope": "home_video",
+    "active": true
+  }
+]

@@ -1,0 +1,74 @@
+/* Overall Modal Styles */
+.dialog-content {
+  width: 90%; /* Allow it to use 90% of the width on smaller screens */
+  max-width: 900px; /* Set a max width for larger screens */
+  height: auto; /* Auto adjust based on content */
+  max-height: 80vh; /* Limit max height for large modals */
+  overflow-y: auto; /* Allow scrolling if the content overflows */
+  padding: 20px;
+  border-radius: 8px;
+  background-color: #fff;
+}
+
+/* Section for Content inside Modal */
+.dialog-header, .dialog-body, .dialog-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px; /* Add space between sections */
+}
+
+/* Grid Layout for Inputs */
+.dialog-body .grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* 2 columns for medium and large screens */
+  gap: 16px;
+}
+
+.dialog-body .grid input,
+.dialog-body .grid select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.dialog-body .grid .select-trigger {
+  width: 100%;
+  padding: 10px;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* Button Styles */
+button {
+  padding: 10px 20px;
+  font-size: 14px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
+  color: white;
+}
+
+/* Responsiveness */
+@media screen and (max-width: 768px) {
+  .dialog-content {
+    width: 100%; /* Full width on smaller screens */
+    max-width: 100%; /* Allow modal to use full width */
+  }
+
+  .dialog-body .grid {
+    grid-template-columns: 1fr; /* Stack inputs vertically on small screens */
+  }
+
+  button {
+    width: 100%; /* Make buttons take up full width on mobile */
+  }
+}

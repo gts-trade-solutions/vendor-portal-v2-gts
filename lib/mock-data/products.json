@@ -1,0 +1,357 @@
+[
+  {
+    "id": "prod_001",
+    "title": "Deeply Control Balancing Emulsion",
+    "handle": "deeply-control-balancing-emulsion",
+    "description": "A lightweight, fast-absorbing emulsion that balances oil and moisture levels while controlling excess sebum. Formulated with natural ingredients to soothe and hydrate sensitive skin.",
+    "description_html": "<p>A lightweight, fast-absorbing emulsion that balances oil and moisture levels while controlling excess sebum.</p><ul><li>Controls excess oil</li><li>Balances moisture levels</li><li>Soothes sensitive skin</li><li>Non-comedogenic formula</li></ul>",
+    "brand_id": "brand_ahc",
+    "brand_name": "AHC",
+    "category_ids": ["cat_skincare"],
+    "price": 4212,
+    "compare_at_price": 5500,
+    "currency": "INR",
+    "sku": "AHC-DCBE-50",
+    "barcode": "8809640734229",
+    "variants": [
+      {
+        "id": "var_001_1",
+        "product_id": "prod_001",
+        "options": { "size": "50ml" },
+        "sku": "AHC-DCBE-50",
+        "price": 4212,
+        "inventory": 45
+      },
+      {
+        "id": "var_001_2",
+        "product_id": "prod_001",
+        "options": { "size": "100ml" },
+        "sku": "AHC-DCBE-100",
+        "price": 7800,
+        "inventory": 32
+      }
+    ],
+    "images": [
+      "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=800",
+      "https://images.unsplash.com/photo-1556228841-a5f7c5c3b39f?w=800",
+      "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=800"
+    ],
+    "videos": [],
+    "thumbnail": "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=400",
+    "inventory": {
+      "qty": 77,
+      "track_inventory": true,
+      "low_stock_threshold": 10
+    },
+    "vendor_id": "vendor_001",
+    "vendor_name": "Consumer Innovations Direct",
+    "seo": {
+      "meta_title": "AHC Deeply Control Balancing Emulsion | Made Korea",
+      "meta_description": "Lightweight emulsion that balances oil and moisture for healthy skin",
+      "keywords": ["ahc emulsion", "balancing emulsion", "korean skincare"]
+    },
+    "editorial_flags": {
+      "trending": true,
+      "bestseller": true,
+      "new_arrival": false,
+      "featured": true
+    },
+    "status": "active",
+    "visibility": "site",
+    "rating_avg": 4.6,
+    "rating_count": 128,
+    "created_at": "2024-01-15T10:30:00Z",
+    "updated_at": "2024-10-08T08:15:00Z"
+  },
+  {
+    "id": "prod_002",
+    "title": "Advanced Snail 96 Mucin Power Essence",
+    "handle": "advanced-snail-96-mucin-power-essence",
+    "description": "A cult-favorite essence with 96.3% snail secretion filtrate to repair damaged skin, improve elasticity, and provide deep hydration.",
+    "description_html": "<p>A cult-favorite essence with 96.3% snail secretion filtrate to repair damaged skin.</p><ul><li>96.3% Snail Mucin</li><li>Repairs damaged skin</li><li>Improves skin elasticity</li><li>Deep hydration</li></ul>",
+    "brand_id": "brand_cosrx",
+    "brand_name": "COSRX",
+    "category_ids": ["cat_skincare"],
+    "price": 3899,
+    "compare_at_price": null,
+    "currency": "INR",
+    "sku": "COSRX-SNL-100",
+    "barcode": "8809416470269",
+    "variants": [
+      {
+        "id": "var_002_1",
+        "product_id": "prod_002",
+        "options": { "size": "100ml" },
+        "sku": "COSRX-SNL-100",
+        "price": 3899,
+        "inventory": 56
+      }
+    ],
+    "images": [
+      "https://images.unsplash.com/photo-1556228578-dd8f687e1a9d?w=800",
+      "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=800"
+    ],
+    "videos": [],
+    "thumbnail": "https://images.unsplash.com/photo-1556228578-dd8f687e1a9d?w=400",
+    "inventory": {
+      "qty": 56,
+      "track_inventory": true,
+      "low_stock_threshold": 15
+    },
+    "vendor_id": "vendor_002",
+    "vendor_name": "Seoul Beauty Co",
+    "seo": {
+      "meta_title": "COSRX Snail 96 Mucin Power Essence | Made Korea",
+      "meta_description": "Repair and hydrate your skin with 96% snail mucin essence",
+      "keywords": ["cosrx snail", "snail mucin", "essence"]
+    },
+    "editorial_flags": {
+      "trending": true,
+      "bestseller": true,
+      "new_arrival": false,
+      "featured": false
+    },
+    "status": "active",
+    "visibility": "site",
+    "rating_avg": 4.8,
+    "rating_count": 342,
+    "created_at": "2023-11-20T14:20:00Z",
+    "updated_at": "2024-10-07T16:45:00Z"
+  },
+  {
+    "id": "prod_003",
+    "title": "Green Tea Seed Serum",
+    "handle": "green-tea-seed-serum",
+    "description": "A fresh, lightweight serum infused with Jeju green tea extract and green tea seed oil to deeply hydrate and strengthen the skin's moisture barrier.",
+    "description_html": "<p>Fresh serum with Jeju green tea for deep hydration and strengthened moisture barrier.</p><ul><li>Jeju Green Tea Extract</li><li>Green Tea Seed Oil</li><li>Strengthens moisture barrier</li><li>Fresh, lightweight texture</li></ul>",
+    "brand_id": "brand_innisfree",
+    "brand_name": "Innisfree",
+    "category_ids": ["cat_skincare"],
+    "price": 2999,
+    "compare_at_price": 3500,
+    "currency": "INR",
+    "sku": "INNIS-GTS-80",
+    "barcode": "8809612856584",
+    "variants": [
+      {
+        "id": "var_003_1",
+        "product_id": "prod_003",
+        "options": { "size": "80ml" },
+        "sku": "INNIS-GTS-80",
+        "price": 2999,
+        "inventory": 68
+      }
+    ],
+    "images": [
+      "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=800",
+      "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=800"
+    ],
+    "videos": [],
+    "thumbnail": "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=400",
+    "inventory": {
+      "qty": 68,
+      "track_inventory": true,
+      "low_stock_threshold": 20
+    },
+    "vendor_id": "vendor_001",
+    "vendor_name": "Consumer Innovations Direct",
+    "seo": {
+      "meta_title": "Innisfree Green Tea Seed Serum | Made Korea",
+      "meta_description": "Hydrating serum with Jeju green tea extract",
+      "keywords": ["innisfree", "green tea serum", "hydration"]
+    },
+    "editorial_flags": {
+      "trending": false,
+      "bestseller": true,
+      "new_arrival": false,
+      "featured": true
+    },
+    "status": "active",
+    "visibility": "site",
+    "rating_avg": 4.5,
+    "rating_count": 89,
+    "created_at": "2024-02-10T09:15:00Z",
+    "updated_at": "2024-10-05T11:30:00Z"
+  },
+  {
+    "id": "prod_004",
+    "title": "Water Sleeping Mask",
+    "handle": "water-sleeping-mask",
+    "description": "An overnight mask that delivers intense hydration while you sleep. Wake up to supple, radiant skin with Laneige's Water Science technology.",
+    "description_html": "<p>Overnight hydrating mask with Water Science technology for radiant morning skin.</p><ul><li>Overnight hydration</li><li>Water Science technology</li><li>Supple, radiant skin</li><li>Cooling gel texture</li></ul>",
+    "brand_id": "brand_laneige",
+    "brand_name": "Laneige",
+    "category_ids": ["cat_skincare"],
+    "price": 5299,
+    "compare_at_price": null,
+    "currency": "INR",
+    "sku": "LANI-WSM-70",
+    "barcode": "8809643506144",
+    "variants": [
+      {
+        "id": "var_004_1",
+        "product_id": "prod_004",
+        "options": { "size": "70ml" },
+        "sku": "LANI-WSM-70",
+        "price": 5299,
+        "inventory": 42
+      }
+    ],
+    "images": [
+      "https://images.unsplash.com/photo-1570554886111-e80fcca6a029?w=800",
+      "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=800"
+    ],
+    "videos": [],
+    "thumbnail": "https://images.unsplash.com/photo-1570554886111-e80fcca6a029?w=400",
+    "inventory": {
+      "qty": 42,
+      "track_inventory": true,
+      "low_stock_threshold": 15
+    },
+    "vendor_id": "vendor_002",
+    "vendor_name": "Seoul Beauty Co",
+    "seo": {
+      "meta_title": "Laneige Water Sleeping Mask | Made Korea",
+      "meta_description": "Overnight hydrating mask for supple, radiant skin",
+      "keywords": ["laneige", "sleeping mask", "overnight mask"]
+    },
+    "editorial_flags": {
+      "trending": true,
+      "bestseller": false,
+      "new_arrival": true,
+      "featured": true
+    },
+    "status": "active",
+    "visibility": "site",
+    "rating_avg": 4.7,
+    "rating_count": 215,
+    "created_at": "2024-09-01T13:00:00Z",
+    "updated_at": "2024-10-08T09:20:00Z"
+  },
+  {
+    "id": "prod_005",
+    "title": "Double Wear Cushion SPF50+",
+    "handle": "double-wear-cushion-spf50",
+    "description": "A long-lasting cushion foundation with buildable coverage and SPF50+ PA+++ protection. Perfect for creating a flawless, natural-looking complexion.",
+    "description_html": "<p>Long-lasting cushion foundation with buildable coverage and high sun protection.</p><ul><li>SPF50+ PA+++</li><li>Buildable coverage</li><li>Long-lasting formula</li><li>Natural finish</li></ul>",
+    "brand_id": "brand_etude",
+    "brand_name": "Etude House",
+    "category_ids": ["cat_makeup"],
+    "price": 3499,
+    "compare_at_price": 4200,
+    "currency": "INR",
+    "sku": "ETUDE-DWC-13N",
+    "barcode": "8809667991797",
+    "variants": [
+      {
+        "id": "var_005_1",
+        "product_id": "prod_005",
+        "options": { "shade": "13N Ivory" },
+        "sku": "ETUDE-DWC-13N",
+        "price": 3499,
+        "inventory": 28
+      },
+      {
+        "id": "var_005_2",
+        "product_id": "prod_005",
+        "options": { "shade": "21N Beige" },
+        "sku": "ETUDE-DWC-21N",
+        "price": 3499,
+        "inventory": 35
+      },
+      {
+        "id": "var_005_3",
+        "product_id": "prod_005",
+        "options": { "shade": "23N Sand" },
+        "sku": "ETUDE-DWC-23N",
+        "price": 3499,
+        "inventory": 31
+      }
+    ],
+    "images": [
+      "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=800",
+      "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=800"
+    ],
+    "videos": [],
+    "thumbnail": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400",
+    "inventory": {
+      "qty": 94,
+      "track_inventory": true,
+      "low_stock_threshold": 20
+    },
+    "vendor_id": "vendor_003",
+    "vendor_name": "Beauty Hub Korea",
+    "seo": {
+      "meta_title": "Etude House Double Wear Cushion SPF50+ | Made Korea",
+      "meta_description": "Flawless cushion foundation with high SPF protection",
+      "keywords": ["etude house", "cushion foundation", "spf50"]
+    },
+    "editorial_flags": {
+      "trending": false,
+      "bestseller": true,
+      "new_arrival": false,
+      "featured": false
+    },
+    "status": "active",
+    "visibility": "site",
+    "rating_avg": 4.4,
+    "rating_count": 167,
+    "created_at": "2024-03-15T10:45:00Z",
+    "updated_at": "2024-10-06T14:10:00Z"
+  },
+  {
+    "id": "prod_006",
+    "title": "First Care Activating Serum",
+    "handle": "first-care-activating-serum",
+    "description": "A luxurious activating serum enriched with JAUM Balancing Complex™ to optimize your skin for better absorption of subsequent skincare products.",
+    "description_html": "<p>Luxury activating serum with JAUM Balancing Complex™ for optimized skincare absorption.</p><ul><li>JAUM Balancing Complex™</li><li>Optimizes absorption</li><li>Balances skin</li><li>Herbal ingredients</li></ul>",
+    "brand_id": "brand_sulwhasoo",
+    "brand_name": "Sulwhasoo",
+    "category_ids": ["cat_skincare"],
+    "price": 12999,
+    "compare_at_price": 15000,
+    "currency": "INR",
+    "sku": "SULW-FCA-90",
+    "barcode": "8801051379914",
+    "variants": [
+      {
+        "id": "var_006_1",
+        "product_id": "prod_006",
+        "options": { "size": "90ml" },
+        "sku": "SULW-FCA-90",
+        "price": 12999,
+        "inventory": 18
+      }
+    ],
+    "images": [
+      "https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=800",
+      "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=800"
+    ],
+    "videos": [],
+    "thumbnail": "https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=400",
+    "inventory": {
+      "qty": 18,
+      "track_inventory": true,
+      "low_stock_threshold": 5
+    },
+    "vendor_id": "vendor_001",
+    "vendor_name": "Consumer Innovations Direct",
+    "seo": {
+      "meta_title": "Sulwhasoo First Care Activating Serum | Made Korea",
+      "meta_description": "Luxury activating serum with Korean herbal medicine",
+      "keywords": ["sulwhasoo", "activating serum", "luxury skincare"]
+    },
+    "editorial_flags": {
+      "trending": false,
+      "bestseller": false,
+      "new_arrival": true,
+      "featured": true
+    },
+    "status": "active",
+    "visibility": "site",
+    "rating_avg": 4.9,
+    "rating_count": 76,
+    "created_at": "2024-08-20T11:30:00Z",
+    "updated_at": "2024-10-08T07:50:00Z"
+  }
+]
