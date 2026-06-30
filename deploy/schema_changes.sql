@@ -99,3 +99,13 @@ CREATE TRIGGER trg_iu_stock_au AFTER UPDATE ON inventory_units FOR EACH ROW
 UPDATE products p SET stock_qty = (
   SELECT COUNT(*) FROM inventory_units u WHERE u.product_id = p.id AND u.status = 'IN_STOCK'
 );
+
+-- 6) OPTIONAL — keep BUNDLES sellable after the backfill  [decide before prod run]
+-- The backfill above makes any product with 0 IN-STOCK units show OUT OF STOCK on
+-- the LIVE storefront. Bundles/kits (is_bundle = 1) do NOT hold their own units, so
+-- they would all go out of stock. If bundles must stay sellable, UNCOMMENT this to
+-- mark them "always available" (track_inventory = 0 ⇒ storefront ignores stock_qty).
+-- Leave commented if you want the strict "0 inventory = out of stock" behaviour for
+-- bundles too. (Does NOT affect non-bundle products.)
+--
+-- UPDATE products SET track_inventory = 0 WHERE is_bundle = 1;
