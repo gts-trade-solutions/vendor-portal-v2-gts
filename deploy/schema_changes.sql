@@ -74,19 +74,24 @@ PREPARE st2 FROM @s2; EXECUTE st2; DEALLOCATE PREPARE st2;
 -- allocation auto-recomputes the affected product(s) stock_qty. No app code path
 -- needs to maintain it. (CREATE TRIGGER has no IF NOT EXISTS, so DROP-then-CREATE
 -- keeps this idempotent.)
+-- NOTE: the AFTER UPDATE trigger is a multi-statement BEGIN…END body, so the whole
+-- trigger block is wrapped in DELIMITER $$ — otherwise the mysql CLI splits on the
+-- inner ';' and the trigger fails to create. (mysql -e / piped files both need this.)
 DROP TRIGGER IF EXISTS trg_iu_stock_ai;
 DROP TRIGGER IF EXISTS trg_iu_stock_au;
 DROP TRIGGER IF EXISTS trg_iu_stock_ad;
 
+DELIMITER $$
+
 CREATE TRIGGER trg_iu_stock_ai AFTER INSERT ON inventory_units FOR EACH ROW
   UPDATE products SET stock_qty = (
     SELECT COUNT(*) FROM inventory_units WHERE product_id = NEW.product_id AND status = 'IN_STOCK'
-  ) WHERE id = NEW.product_id;
+  ) WHERE id = NEW.product_id$$
 
 CREATE TRIGGER trg_iu_stock_ad AFTER DELETE ON inventory_units FOR EACH ROW
   UPDATE products SET stock_qty = (
     SELECT COUNT(*) FROM inventory_units WHERE product_id = OLD.product_id AND status = 'IN_STOCK'
-  ) WHERE id = OLD.product_id;
+  ) WHERE id = OLD.product_id$$
 
 CREATE TRIGGER trg_iu_stock_au AFTER UPDATE ON inventory_units FOR EACH ROW
   BEGIN
@@ -98,7 +103,9 @@ CREATE TRIGGER trg_iu_stock_au AFTER UPDATE ON inventory_units FOR EACH ROW
         SELECT COUNT(*) FROM inventory_units WHERE product_id = OLD.product_id AND status = 'IN_STOCK'
       ) WHERE id = OLD.product_id;
     END IF;
-  END;
+  END$$
+
+DELIMITER ;
 
 -- One-time backfill so existing rows match reality immediately after the triggers
 -- are installed (the triggers only fire on FUTURE unit changes).
