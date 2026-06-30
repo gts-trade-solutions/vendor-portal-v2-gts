@@ -48,16 +48,22 @@ CREATE TABLE IF NOT EXISTS vendor_activity_log (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 3) UPI VPA on seller companies (for the invoice payment QR)  [P2 — invoice companies]
--- MySQL 8.0.29+ supports IF NOT EXISTS on ADD COLUMN. If your server is older,
--- run deploy/migrate.mjs instead (it checks information_schema first).
-ALTER TABLE invoice_companies
-  ADD COLUMN IF NOT EXISTS upi_vpa VARCHAR(255) NULL AFTER swift_code;
+-- NOTE: MySQL does NOT support `ADD COLUMN IF NOT EXISTS` (that's MariaDB), so we
+-- guard with information_schema + a prepared statement to stay idempotent.
+SET @c := (SELECT COUNT(*) FROM information_schema.columns
+           WHERE table_schema = DATABASE() AND table_name = 'invoice_companies' AND column_name = 'upi_vpa');
+SET @t := (SELECT COUNT(*) FROM information_schema.tables
+           WHERE table_schema = DATABASE() AND table_name = 'invoice_companies');
+SET @s := IF(@t = 1 AND @c = 0, 'ALTER TABLE invoice_companies ADD COLUMN upi_vpa VARCHAR(255) NULL', 'DO 0');
+PREPARE st FROM @s; EXECUTE st; DEALLOCATE PREPARE st;
 
 -- 4) Vendor (offline / invoice) sale price on products  [product unification]
 -- The unified single-product model carries BOTH an online price (`price`) and an
 -- offline/vendor sale price (`vendor_price`). Storefront still reads `price`.
-ALTER TABLE products
-  ADD COLUMN IF NOT EXISTS vendor_price DECIMAL(12,2) NULL AFTER sale_price;
+SET @c2 := (SELECT COUNT(*) FROM information_schema.columns
+            WHERE table_schema = DATABASE() AND table_name = 'products' AND column_name = 'vendor_price');
+SET @s2 := IF(@c2 = 0, 'ALTER TABLE products ADD COLUMN vendor_price DECIMAL(12,2) NULL AFTER sale_price', 'DO 0');
+PREPARE st2 FROM @s2; EXECUTE st2; DEALLOCATE PREPARE st2;
 
 -- 5) Stock sync: keep products.stock_qty = COUNT(IN_STOCK inventory_units)
 --    [stock unification — standard "0 inventory = out of stock" flow]

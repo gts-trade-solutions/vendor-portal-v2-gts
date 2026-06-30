@@ -15,8 +15,8 @@ set -euo pipefail
 
 ### ---- CONFIG (override via env, e.g. PORT=3002 bash deploy/deploy-production.sh) ----
 APP_DIR="${APP_DIR:-$(pwd)}"
-PORT="${PORT:-3001}"                       # vendor portal port (behind nginx)
-PM2_NAME="${PM2_NAME:-vendor-portal}"
+PORT="${PORT:-3008}"                        # vendor portal port (behind nginx); 3008 = live
+PM2_NAME="${PM2_NAME:-madenkorea-vendor}"   # matches the live pm2 process
 DOMAIN="${DOMAIN:-vendor.madenkorea.com}"
 BACKUP_DIR="${BACKUP_DIR:-$HOME/db-backups}"
 BRANCH="${BRANCH:-main}"
