@@ -1249,6 +1249,223 @@ export default function VendorDashboard() {
           </div>
         </div>
 
+        {/* Quick actions */}
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <Card className="transition-shadow hover:shadow-lg">
+            <CardHeader>
+              <FileText className="mb-2 h-8 w-8 text-primary" />
+              <CardTitle>Invoices</CardTitle>
+              <CardDescription>Create and manage invoices</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => router.push("/vendor/invoices")}
+              >
+                Open Invoices
+              </Button>
+            </CardContent>
+          </Card>
+          <Card className="transition-shadow hover:shadow-lg">
+            <CardHeader>
+              <Package className="mb-2 h-8 w-8 text-primary" />
+              <CardTitle>Products</CardTitle>
+              <CardDescription>Manage your product catalog</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => router.push("/vendor/products")}
+              >
+                Manage Products
+              </Button>
+            </CardContent>
+          </Card>
+          <Card className="transition-shadow hover:shadow-lg">
+            <CardHeader>
+              <ShoppingCart className="mb-2 h-8 w-8 text-primary" />
+              <CardTitle>Orders</CardTitle>
+              <CardDescription>View and fulfill orders</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => router.push("/vendor/orders")}
+              >
+                View Orders
+              </Button>
+            </CardContent>
+          </Card>
+          <Card className="transition-shadow hover:shadow-lg">
+            <CardHeader>
+              <DollarSign className="mb-2 h-8 w-8 text-primary" />
+              <CardTitle>Payouts</CardTitle>
+              <CardDescription>Track your earnings</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => router.push("/vendor/payouts")}
+              >
+                View Payouts
+              </Button>
+            </CardContent>
+          </Card>
+          <Card className="transition-shadow hover:shadow-lg">
+            <CardHeader>
+              <AlertTriangle className="mb-2 h-8 w-8 text-primary" />
+              <CardTitle>Alerts</CardTitle>
+              <CardDescription>Monitor inventory and expiry</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => router.push("/vendor/alerts")}
+              >
+                View Alerts
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="transition-shadow hover:shadow-lg">
+            <CardHeader>
+              <Globe className="mb-2 h-8 w-8 text-primary" />
+              <CardTitle>Online Sales</CardTitle>
+              <CardDescription>
+                Storefront orders &amp; fulfilment
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => router.push("/vendor/online-orders")}
+              >
+                View Online Orders
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="transition-shadow hover:shadow-lg">
+            <CardHeader>
+              <BarChart3 className="mb-2 h-8 w-8 text-primary" />
+              <CardTitle>Reports</CardTitle>
+              <CardDescription>Download XLSX exports</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => router.push("/vendor/reports")}
+              >
+                Open Reports
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="transition-shadow hover:shadow-lg">
+            <CardHeader>
+              <Settings className="mb-2 h-8 w-8 text-primary" />
+              <CardTitle>Settings</CardTitle>
+              <CardDescription>Business profile &amp; account</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => router.push("/vendor/settings")}
+              >
+                Open Settings
+              </Button>
+            </CardContent>
+          </Card>
+
+          {(vendor.role === "owner" || vendor.role === "manager") && (
+            <Card className="transition-shadow hover:shadow-lg">
+              <CardHeader>
+                <Users className="mb-2 h-8 w-8 text-primary" />
+                <CardTitle>Team</CardTitle>
+                <CardDescription>Manage staff &amp; access</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => router.push("/vendor/team")}
+                >
+                  Manage Team
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
+          {(vendor.role === "owner" || vendor.role === "manager") && (
+            <Card className="transition-shadow hover:shadow-lg">
+              <CardHeader>
+                <Building2 className="mb-2 h-8 w-8 text-primary" />
+                <CardTitle>Invoice Companies</CardTitle>
+                <CardDescription>
+                  Seller entities &amp; bank details
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => router.push("/vendor/invoice-companies")}
+                >
+                  Manage Companies
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
+          {(vendor.role === "owner" || vendor.role === "manager") && (
+            <Card className="transition-shadow hover:shadow-lg">
+              <CardHeader>
+                <History className="mb-2 h-8 w-8 text-primary" />
+                <CardTitle>Activity Log</CardTitle>
+                <CardDescription>Audit trail of changes</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => router.push("/vendor/activity")}
+                >
+                  View Activity
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
+          {(vendor.role === "owner" || vendor.role === "manager") && (
+            <Card className="transition-shadow hover:shadow-lg">
+              <CardHeader>
+                <GitMerge className="mb-2 h-8 w-8 text-primary" />
+                <CardTitle>Merge Duplicates</CardTitle>
+                <CardDescription>
+                  Combine duplicate online + inventory products
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => router.push("/vendor/products/merge")}
+                >
+                  Merge Products
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
         {/* Financial summary cards */}
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-5">
           <Card className="border-l-4 border-l-blue-500 bg-blue-50/50">
@@ -2413,222 +2630,6 @@ export default function VendorDashboard() {
           </CardContent>
         </Card>
 
-        {/* Quick actions */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <Card className="transition-shadow hover:shadow-lg">
-            <CardHeader>
-              <FileText className="mb-2 h-8 w-8 text-primary" />
-              <CardTitle>Invoices</CardTitle>
-              <CardDescription>Create and manage invoices</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => router.push("/vendor/invoices")}
-              >
-                Open Invoices
-              </Button>
-            </CardContent>
-          </Card>
-          <Card className="transition-shadow hover:shadow-lg">
-            <CardHeader>
-              <Package className="mb-2 h-8 w-8 text-primary" />
-              <CardTitle>Products</CardTitle>
-              <CardDescription>Manage your product catalog</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => router.push("/vendor/products")}
-              >
-                Manage Products
-              </Button>
-            </CardContent>
-          </Card>
-          <Card className="transition-shadow hover:shadow-lg">
-            <CardHeader>
-              <ShoppingCart className="mb-2 h-8 w-8 text-primary" />
-              <CardTitle>Orders</CardTitle>
-              <CardDescription>View and fulfill orders</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => router.push("/vendor/orders")}
-              >
-                View Orders
-              </Button>
-            </CardContent>
-          </Card>
-          <Card className="transition-shadow hover:shadow-lg">
-            <CardHeader>
-              <DollarSign className="mb-2 h-8 w-8 text-primary" />
-              <CardTitle>Payouts</CardTitle>
-              <CardDescription>Track your earnings</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => router.push("/vendor/payouts")}
-              >
-                View Payouts
-              </Button>
-            </CardContent>
-          </Card>
-          <Card className="transition-shadow hover:shadow-lg">
-            <CardHeader>
-              <AlertTriangle className="mb-2 h-8 w-8 text-primary" />
-              <CardTitle>Alerts</CardTitle>
-              <CardDescription>Monitor inventory and expiry</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => router.push("/vendor/alerts")}
-              >
-                View Alerts
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="transition-shadow hover:shadow-lg">
-            <CardHeader>
-              <Globe className="mb-2 h-8 w-8 text-primary" />
-              <CardTitle>Online Sales</CardTitle>
-              <CardDescription>
-                Storefront orders &amp; fulfilment
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => router.push("/vendor/online-orders")}
-              >
-                View Online Orders
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="transition-shadow hover:shadow-lg">
-            <CardHeader>
-              <BarChart3 className="mb-2 h-8 w-8 text-primary" />
-              <CardTitle>Reports</CardTitle>
-              <CardDescription>Download XLSX exports</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => router.push("/vendor/reports")}
-              >
-                Open Reports
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="transition-shadow hover:shadow-lg">
-            <CardHeader>
-              <Settings className="mb-2 h-8 w-8 text-primary" />
-              <CardTitle>Settings</CardTitle>
-              <CardDescription>Business profile &amp; account</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => router.push("/vendor/settings")}
-              >
-                Open Settings
-              </Button>
-            </CardContent>
-          </Card>
-
-          {(vendor.role === "owner" || vendor.role === "manager") && (
-            <Card className="transition-shadow hover:shadow-lg">
-              <CardHeader>
-                <Users className="mb-2 h-8 w-8 text-primary" />
-                <CardTitle>Team</CardTitle>
-                <CardDescription>Manage staff &amp; access</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => router.push("/vendor/team")}
-                >
-                  Manage Team
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-
-          {(vendor.role === "owner" || vendor.role === "manager") && (
-            <Card className="transition-shadow hover:shadow-lg">
-              <CardHeader>
-                <Building2 className="mb-2 h-8 w-8 text-primary" />
-                <CardTitle>Invoice Companies</CardTitle>
-                <CardDescription>
-                  Seller entities &amp; bank details
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => router.push("/vendor/invoice-companies")}
-                >
-                  Manage Companies
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-
-          {(vendor.role === "owner" || vendor.role === "manager") && (
-            <Card className="transition-shadow hover:shadow-lg">
-              <CardHeader>
-                <History className="mb-2 h-8 w-8 text-primary" />
-                <CardTitle>Activity Log</CardTitle>
-                <CardDescription>Audit trail of changes</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => router.push("/vendor/activity")}
-                >
-                  View Activity
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-
-          {(vendor.role === "owner" || vendor.role === "manager") && (
-            <Card className="transition-shadow hover:shadow-lg">
-              <CardHeader>
-                <GitMerge className="mb-2 h-8 w-8 text-primary" />
-                <CardTitle>Merge Duplicates</CardTitle>
-                <CardDescription>
-                  Combine duplicate online + inventory products
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => router.push("/vendor/products/merge")}
-                >
-                  Merge Products
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-        </div>
       </div>
     </div>
   );
