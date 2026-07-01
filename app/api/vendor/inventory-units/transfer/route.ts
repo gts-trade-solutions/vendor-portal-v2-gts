@@ -100,7 +100,10 @@ export async function POST(req: Request) {
         validIds,
         targetName: target.name,
       };
-    });
+    },
+    // Moving units changes their product_id, firing the stock_qty triggers per
+    // row; a large transfer can exceed Prisma's default 5s timeout. Give headroom.
+    { timeout: 60_000, maxWait: 10_000 });
 
     if ("error" in result) {
       return json({ ok: false, error: result.error }, result.status);

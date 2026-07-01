@@ -64,8 +64,14 @@ export async function POST(req: NextRequest) {
       : Number(vpRaw);
 
   try {
-    const result = await prisma.$transaction((tx) =>
-      mergeProducts(tx, { survivorId, duplicateId, vendorId: gate.vendor.id, vendorPrice }),
+    // Large merges move ALL of the duplicate's inventory_units onto the survivor.
+    // Each moved unit fires the stock_qty triggers (recompute for both products),
+    // so a duplicate with ~1000 units blows past Prisma's default 5s interactive
+    // transaction timeout (observed 7.1s for 982 units). Give it generous headroom.
+    const result = await prisma.$transaction(
+      (tx) =>
+        mergeProducts(tx, { survivorId, duplicateId, vendorId: gate.vendor.id, vendorPrice }),
+      { timeout: 120_000, maxWait: 10_000 },
     );
     await logActivity({
       vendorId: gate.vendor.id,
