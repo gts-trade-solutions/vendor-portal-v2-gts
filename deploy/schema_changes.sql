@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS vendor_order_fulfillment (
   PRIMARY KEY (id),
   UNIQUE KEY uq_vof_order_vendor (order_id, vendor_id),
   KEY idx_vof_vendor (vendor_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 2) Per-vendor activity / audit trail  [P3 — audit log]
 CREATE TABLE IF NOT EXISTS vendor_activity_log (
@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS vendor_activity_log (
   PRIMARY KEY (id),
   KEY idx_val_vendor_created (vendor_id, created_at),
   KEY idx_val_entity (entity_type, entity_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 3) UPI VPA on seller companies (for the invoice payment QR)  [P2 — invoice companies]
 -- NOTE: MySQL does NOT support `ADD COLUMN IF NOT EXISTS` (that's MariaDB), so we
