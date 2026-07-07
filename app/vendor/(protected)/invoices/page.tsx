@@ -41,6 +41,7 @@ type InvoiceRow = {
 const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 
 type SortKey =
+  | "invoice_number"
   | "invoice_date"
   | "grand_total"
   | "customer_name"
@@ -48,6 +49,7 @@ type SortKey =
   | "outstanding";
 
 const SORT_KEYS: SortKey[] = [
+  "invoice_number",
   "invoice_date",
   "grand_total",
   "customer_name",
@@ -344,26 +346,6 @@ export default function InvoicesListPage() {
     }
   };
 
-  const handleDuplicate = async (inv: InvoiceRow) => {
-    setDuplicatingId(inv.id);
-    try {
-      const res = await fetch(
-        `/api/vendor/invoices/duplicate?id=${encodeURIComponent(inv.id)}`,
-        { method: "POST" },
-      );
-      const json = await res.json().catch(() => ({}));
-      if (!res.ok || !json?.ok || !json?.id) {
-        throw new Error(json?.error || "Failed to duplicate invoice");
-      }
-      toast.success("Invoice duplicated. Editing the copy.");
-      router.push(`/vendor/invoices/${json.id}/edit`);
-    } catch (err: any) {
-      console.error(err);
-      toast.error(err?.message || "Failed to duplicate invoice");
-    } finally {
-      setDuplicatingId(null);
-    }
-  };
 
   // ---- Sorting ----
   // Click a header: same column toggles dir; new column starts desc (asc for the
@@ -820,8 +802,11 @@ export default function InvoicesListPage() {
                           onChange={toggleSelectAll}
                         />
                       </th>
-                      <th className="px-4 py-3 text-left font-semibold">
-                        Invoice No.
+                      <th
+                        className="cursor-pointer select-none px-4 py-3 text-left font-semibold hover:text-slate-900"
+                        onClick={() => toggleSort("invoice_number")}
+                      >
+                        Invoice No.{sortIndicator("invoice_number")}
                       </th>
                       <th
                         className="cursor-pointer select-none px-4 py-3 text-left font-semibold hover:text-slate-900"
@@ -939,17 +924,6 @@ export default function InvoicesListPage() {
                                   }
                                 >
                                   Edit
-                                </Button>
-
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  disabled={duplicatingId === inv.id}
-                                  onClick={() => handleDuplicate(inv)}
-                                >
-                                  {duplicatingId === inv.id
-                                    ? "Duplicating…"
-                                    : "Duplicate"}
                                 </Button>
 
                                 <Button

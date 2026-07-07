@@ -75,6 +75,10 @@ export function buildProductData(p: any): any {
     attributes: p.attributes ?? {},
     faq: Array.isArray(p.faq) ? p.faq : [],
     key_benefits: Array.isArray(p.key_benefits) ? p.key_benefits : [],
+    // additional_details is a NOT NULL JSON column whose DB default isn't applied
+    // on insert via Prisma — send {} explicitly or product create fails with a
+    // "Null constraint violation on additional_details" error.
+    additional_details: p.additional_details ?? {},
 
     volume_ml: numOrNull(p.volume_ml),
     net_weight_g: numOrNull(p.net_weight_g),

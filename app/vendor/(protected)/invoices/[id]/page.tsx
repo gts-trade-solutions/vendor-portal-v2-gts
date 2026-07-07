@@ -548,26 +548,6 @@ export default function InvoiceViewPage() {
     await recordPayment(outstanding, "Manual");
   };
 
-  const duplicateInvoice = async () => {
-    setDuplicating(true);
-    try {
-      const res = await fetch(
-        `/api/vendor/invoices/duplicate?id=${encodeURIComponent(invoiceId)}`,
-        { method: "POST" },
-      );
-      const json = await res.json().catch(() => ({}));
-      if (!res.ok || !json?.ok || !json?.id) {
-        toast.error(json?.error || "Failed to duplicate invoice");
-        return;
-      }
-      toast.success("Invoice duplicated. Editing the copy.");
-      router.push(`/vendor/invoices/${json.id}/edit`);
-    } catch (e: any) {
-      toast.error(e?.message || "Failed to duplicate invoice");
-    } finally {
-      setDuplicating(false);
-    }
-  };
 
   const sendInvoiceEmail = async (type: "invoice" | "reminder") => {
     if (!invoice?.email) {
@@ -764,15 +744,6 @@ export default function InvoiceViewPage() {
               onClick={() => router.push(`/vendor/invoices/${invoiceId}/edit`)}
             >
               Edit
-            </Button>
-          )}
-          {isAdmin && (
-            <Button
-              variant="outline"
-              disabled={duplicating}
-              onClick={duplicateInvoice}
-            >
-              {duplicating ? "Duplicating…" : "Duplicate"}
             </Button>
           )}
           <Button variant="outline" onClick={() => window.print()}>

@@ -27,6 +27,7 @@ import { jsonSafe } from "@/lib/db/serialize";
 //   dir   -> asc | desc (default desc)
 //   all=1 -> return the full filtered result set (capped) for export, ignoring pagination
 const SORTABLE = new Set([
+  "invoice_number",
   "invoice_date",
   "grand_total",
   "customer_name",
@@ -215,13 +216,15 @@ export async function GET(req: NextRequest) {
       count = total;
     } else {
       const orderBy: any =
-        sort === "grand_total"
-          ? { grand_total: dir }
-          : sort === "customer_name"
-            ? { customer_name: dir }
-            : sort === "payment_status"
-              ? { payment_status: dir }
-              : { invoice_date: dir };
+        sort === "invoice_number"
+          ? { invoice_number: dir }
+          : sort === "grand_total"
+            ? { grand_total: dir }
+            : sort === "customer_name"
+              ? { customer_name: dir }
+              : sort === "payment_status"
+                ? { payment_status: dir }
+                : { invoice_date: dir };
 
       const [r, c] = await Promise.all([
         prisma.invoices.findMany({
