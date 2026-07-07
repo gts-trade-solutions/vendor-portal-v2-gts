@@ -85,7 +85,10 @@ export async function POST(req: Request) {
       const upd = await tx.inventory_units.updateMany({
         where: {
           id: { in: validIds },
-          products: { vendor_id: ctx.vendor.id },
+          // Scope by the unit's own vendor_id (validIds already ownership-checked above).
+          // Not the products relation — moving units fires the stock_qty trigger which
+          // updates `products`; referencing it in this statement would trip 1442.
+          vendor_id: ctx.vendor.id,
         },
         data: {
           product_id: target_product_id,

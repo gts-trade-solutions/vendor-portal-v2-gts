@@ -91,7 +91,9 @@ export async function POST(req: Request) {
 
     const where: any = {
       id: { in: ids },
-      products: { vendor_id: vendorId },
+      // Scope by the unit's own vendor_id, not the products relation — the stock_qty
+      // trigger updates `products`, which the invoking statement must not reference (1442).
+      vendor_id: vendorId,
     };
     if (productId) where.product_id = productId;
 

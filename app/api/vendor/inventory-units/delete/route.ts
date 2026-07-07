@@ -99,10 +99,12 @@ export async function POST(req: Request) {
     const usingIds = Array.isArray(body?.ids);
     const verifiedGuard = !!body?.verifiedGuard;
 
-    // Base scope: caller's vendor (via products relation) + this product.
+    // Base scope: caller's vendor + this product. Scope via the unit's own
+    // vendor_id (not the products relation) — the AFTER DELETE stock_qty trigger
+    // updates `products`, so referencing it here would trip MySQL error 1442.
     const where: any = {
       product_id: productId,
-      products: { vendor_id: vendorId },
+      vendor_id: vendorId,
     };
 
     if (usingIds) {

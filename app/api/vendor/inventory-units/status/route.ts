@@ -79,7 +79,11 @@ export async function POST(req: Request) {
       where: {
         id: { in: ids },
         product_id: productId,
-        products: { vendor_id: vendorId },
+        // Scope by the unit's own vendor_id (identical to products.vendor_id — verified
+        // 0 mismatches). Must NOT filter via the products relation here: the stock_qty
+        // trigger updates `products`, and MySQL forbids a trigger from modifying a table
+        // the invoking statement already references (error 1442).
+        vendor_id: vendorId,
       },
       data,
     });
