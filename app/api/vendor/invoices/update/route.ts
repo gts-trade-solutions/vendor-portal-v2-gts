@@ -192,6 +192,7 @@ export async function POST(req: NextRequest) {
           // nullif(value, '') — overwrite to value-or-null unconditionally
           due_date: h.due_date ? new Date(h.due_date) : null,
           billing_address: nullif(h.billing_address),
+          bill_to_address_id: nullif(h.bill_to_address_id),
           phone: nullif(h.phone),
           email: nullif(h.email),
           gst_number: nullif(h.gst_number),

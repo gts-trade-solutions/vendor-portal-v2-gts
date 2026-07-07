@@ -31,6 +31,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { numberToIndianWords } from "@/lib/invoice-calculations";
+import {
+  QuickAddAddressDialog,
+  type InvoiceAddress,
+} from "@/components/addresses/QuickAddAddressDialog";
 
 const SUPPORT_EMAIL_FALLBACK = "info@madenkorea.com";
 
@@ -288,6 +292,42 @@ export default function InvoiceEditPage() {
   const [panNumber, setPanNumber] = useState<string>("");
   const [notes, setNotes] = useState<string>("");
 
+  // Saved bill-to addresses + selection (same dropdown as the create page).
+  const [addresses, setAddresses] = useState<InvoiceAddress[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<string>("");
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch("/api/vendor/invoice-addresses", {
+          cache: "no-store",
+        });
+        const json = await res.json().catch(() => ({}));
+        setAddresses(
+          res.ok && json?.ok ? ((json.data || []) as InvoiceAddress[]) : [],
+        );
+      } catch {
+        setAddresses([]);
+      }
+    })();
+  }, []);
+  // Selecting a saved address prefills the customer + billing fields.
+  const applyAddressToCustomerFields = (addr: InvoiceAddress) => {
+    setCustomerName(addr.name || "");
+    setPhone(addr.phone || "");
+    setEmail(addr.email || "");
+    setGstNumber(addr.gstin || "");
+    setBillingAddress(
+      [
+        addr.address_line1,
+        addr.address_line2,
+        `${addr.city}, ${addr.state} - ${addr.pincode}`,
+        addr.country || "India",
+      ]
+        .filter(Boolean)
+        .join("\n"),
+    );
+  };
+
   // Tax controls
   const [taxType, setTaxType] = useState<TaxType>("CGST_SGST");
   const [cgstPercent, setCgstPercent] = useState<number>(9);
@@ -425,6 +465,7 @@ export default function InvoiceEditPage() {
         setGstNumber(inv.gst_number ?? "");
         setPanNumber(inv.pan_number ?? "");
         setNotes(inv.notes ?? "");
+        setSelectedAddressId((inv as any).bill_to_address_id ?? "");
 
         const tt = ((inv as any).tax_type ?? "CGST_SGST") as TaxType;
         setTaxType(tt);
@@ -1039,6 +1080,7 @@ export default function InvoiceEditPage() {
           due_date: dueDate || null,
           customer_name: customerName,
           billing_address: billingAddress || null,
+          bill_to_address_id: selectedAddressId || null,
           phone: phone || null,
           email: email || null,
           gst_number: gstNumber || null,
@@ -1198,6 +1240,51 @@ export default function InvoiceEditPage() {
               <Label>Due Date</Label>
               <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
             </div>
+          </div>
+
+          {/* Bill To Address (prefill) — same dropdown as the create page */}
+          <div className="border-t pt-4">
+            <div className="mb-2 flex items-center justify-between">
+              <Label>Bill To Address (prefill)</Label>
+              <div className="flex items-center gap-2">
+                <QuickAddAddressDialog
+                  triggerText="Quick Add"
+                  onCreated={(created) => {
+                    setAddresses((prev) => [created as any, ...prev]);
+                    setSelectedAddressId(created.id);
+                    applyAddressToCustomerFields(created as any);
+                  }}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => router.push("/vendor/addresses")}
+                >
+                  Manage
+                </Button>
+              </div>
+            </div>
+            <select
+              value={selectedAddressId}
+              onChange={(e) => {
+                const id = e.target.value;
+                setSelectedAddressId(id);
+                const addr = addresses.find((a) => a.id === id);
+                if (addr) applyAddressToCustomerFields(addr);
+              }}
+              className="w-full rounded-md border px-3 py-2"
+            >
+              <option value="">Select saved address</option>
+              {addresses.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.label} — {a.city}
+                </option>
+              ))}
+            </select>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Select an address to auto-fill Customer Details and Billing Address.
+            </p>
           </div>
 
           {/* Customer */}
