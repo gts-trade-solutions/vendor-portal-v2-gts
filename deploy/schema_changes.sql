@@ -120,3 +120,12 @@ UPDATE products p SET stock_qty = (
 -- to keep them buyable. Does NOT affect non-bundle products — those follow the strict
 -- "0 inventory = out of stock" flow.
 UPDATE products SET track_inventory = 0 WHERE is_bundle = 1;
+
+-- 7) Tax inclusive/exclusive flag on invoices  [invoice tax mode toggle]
+-- true (default) = tax is INCLUDED within the grand total (extracted from the line
+-- prices); false = tax is EXCLUDED and added on top. Guarded (MySQL has no
+-- ADD COLUMN IF NOT EXISTS).
+SET @c3 := (SELECT COUNT(*) FROM information_schema.columns
+            WHERE table_schema = DATABASE() AND table_name = 'invoices' AND column_name = 'tax_inclusive');
+SET @s3 := IF(@c3 = 0, 'ALTER TABLE invoices ADD COLUMN tax_inclusive TINYINT(1) NOT NULL DEFAULT 1 AFTER tax_type', 'DO 0');
+PREPARE st3 FROM @s3; EXECUTE st3; DEALLOCATE PREPARE st3;

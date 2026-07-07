@@ -117,6 +117,7 @@ export async function POST(req: NextRequest) {
           subtotal: Number(h.subtotal || 0),
           discount_total: Number(h.discount_total || 0),
           tax_type: h.tax_type || "CGST_SGST",
+          tax_inclusive: h.tax_inclusive ?? true,
           cgst_percent: Number(h.cgst_percent || 0),
           sgst_percent: Number(h.sgst_percent || 0),
           igst_percent: Number(h.igst_percent || 0),

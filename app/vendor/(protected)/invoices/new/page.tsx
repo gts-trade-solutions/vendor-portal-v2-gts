@@ -31,8 +31,10 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { QuickAddAddressDialog } from "@/components/addresses/QuickAddAddressDialog";
+import { AddressSearchSelect } from "@/components/addresses/AddressSearchSelect";
 import {
   calculateInclusiveTaxBreakdown,
+  calculateExclusiveTaxBreakdown,
   calculateInvoiceLineTotals,
   calculateLineAmounts,
   round2,
@@ -215,6 +217,9 @@ export default function NewInvoicePage() {
   };
 
   const [taxType, setTaxType] = useState<TaxType>("CGST_SGST");
+  // true = tax INCLUDED in the line prices (extracted from within the grand total);
+  // false = tax EXCLUDED and ADDED on top of the grand total.
+  const [taxInclusive, setTaxInclusive] = useState<boolean>(true);
   const [cgstPercent, setCgstPercent] = useState<number>(9);
   const [sgstPercent, setSgstPercent] = useState<number>(9);
   const [igstPercent, setIgstPercent] = useState<number>(18);
@@ -731,14 +736,17 @@ export default function NewInvoicePage() {
     grandTotal,
     taxableAmount: taxableBaseAmount,
   } = useMemo(() => {
-    return calculateInclusiveTaxBreakdown({
+    const fn = taxInclusive
+      ? calculateInclusiveTaxBreakdown
+      : calculateExclusiveTaxBreakdown;
+    return fn({
       invoiceAmount,
       taxType,
       cgstPercent,
       sgstPercent,
       igstPercent,
     });
-  }, [invoiceAmount, taxType, cgstPercent, sgstPercent, igstPercent]);
+  }, [invoiceAmount, taxType, taxInclusive, cgstPercent, sgstPercent, igstPercent]);
 
   // Reset the form for the next invoice (keeps company / tax / notes / dates).
   const resetForNew = () => {
@@ -878,6 +886,7 @@ export default function NewInvoicePage() {
           subtotal,
           discount_total: discountTotal,
           tax_type: taxType,
+          tax_inclusive: taxInclusive,
           cgst_percent: taxType === "CGST_SGST" ? cgstPercent : 0,
           sgst_percent: taxType === "CGST_SGST" ? sgstPercent : 0,
           igst_percent: taxType === "IGST" ? igstPercent : 0,
@@ -992,25 +1001,14 @@ export default function NewInvoicePage() {
               </div>
             </div>
 
-            <select
+            <AddressSearchSelect
+              addresses={addresses}
               value={selectedAddressId}
-              onChange={(e) => {
-                const id = e.target.value;
+              onSelect={(id, addr) => {
                 setSelectedAddressId(id);
-
-                const addr = addresses.find((a) => a.id === id);
-                if (!addr) return;
-                applyAddressToCustomerFields(addr);
+                if (addr) applyAddressToCustomerFields(addr);
               }}
-              className="w-full border rounded-md px-3 py-2"
-            >
-              <option value="">Select saved address</option>
-              {addresses.map((a) => (
-                <option key={a.id} value={a.id}>
-                  {a.label} — {a.city}
-                </option>
-              ))}
-            </select>
+            />
 
             <p className="text-xs text-muted-foreground">
               Select an address to auto-fill Customer Details and Billing
@@ -1742,6 +1740,22 @@ export default function NewInvoicePage() {
                   <option value="NONE">No Tax</option>
                 </select>
               </div>
+
+              {taxType !== "NONE" && (
+                <div className="mt-2 flex items-center justify-between gap-2">
+                  <span className="text-muted-foreground">In grand total</span>
+                  <select
+                    value={taxInclusive ? "inclusive" : "exclusive"}
+                    onChange={(e) =>
+                      setTaxInclusive(e.target.value === "inclusive")
+                    }
+                    className="border rounded-md px-2 py-1 text-sm"
+                  >
+                    <option value="inclusive">Included (within total)</option>
+                    <option value="exclusive">Excluded (added on top)</option>
+                  </select>
+                </div>
+              )}
 
               {taxType === "CGST_SGST" && (
                 <div className="mt-2 grid grid-cols-2 gap-2">

@@ -182,6 +182,7 @@ export async function POST(req: NextRequest) {
           subtotal: coalesceNum(h.subtotal, existing.subtotal),
           discount_total: coalesceNum(h.discount_total, existing.discount_total),
           tax_type: coalesce(h.tax_type, existing.tax_type),
+          tax_inclusive: h.tax_inclusive ?? true,
           grand_total: coalesceNum(h.grand_total, existing.grand_total),
           total_amount: coalesceNum(h.total_amount, existing.total_amount),
           is_custom:

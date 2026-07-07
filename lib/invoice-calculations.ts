@@ -128,6 +128,42 @@ export const calculateInclusiveTaxBreakdown = ({
   };
 };
 
+// Tax EXCLUSIVE: the line amount is the pre-tax base; tax is ADDED on top, so the
+// grand total = base + tax. (calculateInclusiveTaxBreakdown treats the line amount
+// as already tax-inclusive and extracts the tax from within it instead.)
+export const calculateExclusiveTaxBreakdown = ({
+  invoiceAmount,
+  taxType,
+  cgstPercent,
+  sgstPercent,
+  igstPercent,
+}: {
+  invoiceAmount: unknown;
+  taxType: InvoiceTaxType;
+  cgstPercent: unknown;
+  sgstPercent: unknown;
+  igstPercent: unknown;
+}) => {
+  const base = round2(invoiceAmount);
+  const cgstRate = taxType === "CGST_SGST" ? sanitizeNumber(cgstPercent) : 0;
+  const sgstRate = taxType === "CGST_SGST" ? sanitizeNumber(sgstPercent) : 0;
+  const igstRate = taxType === "IGST" ? sanitizeNumber(igstPercent) : 0;
+
+  const cgstAmount = round2((base * cgstRate) / 100);
+  const sgstAmount = round2((base * sgstRate) / 100);
+  const igstAmount = round2((base * igstRate) / 100);
+  const taxTotal = round2(cgstAmount + sgstAmount + igstAmount);
+
+  return {
+    taxableAmount: base,
+    cgstAmount,
+    sgstAmount,
+    igstAmount,
+    taxTotal,
+    grandTotal: round2(base + taxTotal),
+  };
+};
+
 
 export function getDiscountAmountPerUnit(mrp: number, discountPct: number) {
   const safeMrp = Number(mrp || 0);

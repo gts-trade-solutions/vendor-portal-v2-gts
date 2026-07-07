@@ -1305,6 +1305,7 @@ model invoices {
   bill_to_address_id  String?               @db.Char(36)
   discount_total      Decimal?              @default(0.000000) @db.Decimal(20, 6)
   tax_type            String?               @default("CGST_SGST") @db.VarChar(512)
+  tax_inclusive       Boolean               @default(true)
   cgst_percent        Decimal?              @default(0.000000) @db.Decimal(20, 6)
   sgst_percent        Decimal?              @default(0.000000) @db.Decimal(20, 6)
   igst_percent        Decimal?              @default(0.000000) @db.Decimal(20, 6)

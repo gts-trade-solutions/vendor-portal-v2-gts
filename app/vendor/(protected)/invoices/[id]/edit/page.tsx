@@ -35,6 +35,7 @@ import {
   QuickAddAddressDialog,
   type InvoiceAddress,
 } from "@/components/addresses/QuickAddAddressDialog";
+import { AddressSearchSelect } from "@/components/addresses/AddressSearchSelect";
 
 const SUPPORT_EMAIL_FALLBACK = "info@madenkorea.com";
 
@@ -168,8 +169,28 @@ function extractInclusiveTaxAmounts(
   cgstPercent: number,
   sgstPercent: number,
   igstPercent: number,
+  inclusive: boolean = true,
 ) {
   const gross = round2(Number(amountAfterDiscount || 0));
+
+  // EXCLUSIVE: `gross` is the pre-tax base; tax is added ON TOP of the total.
+  if (!inclusive) {
+    const cgstAmount =
+      taxType === "CGST_SGST" ? round2((gross * Number(cgstPercent || 0)) / 100) : 0;
+    const sgstAmount =
+      taxType === "CGST_SGST" ? round2((gross * Number(sgstPercent || 0)) / 100) : 0;
+    const igstAmount =
+      taxType === "IGST" ? round2((gross * Number(igstPercent || 0)) / 100) : 0;
+    const taxTotal = round2(cgstAmount + sgstAmount + igstAmount);
+    return {
+      taxableAmount: gross,
+      cgstAmount,
+      sgstAmount,
+      igstAmount,
+      taxTotal,
+      grandTotal: round2(gross + taxTotal),
+    };
+  }
 
   if (taxType === "CGST_SGST") {
     const totalPercent = Number(cgstPercent || 0) + Number(sgstPercent || 0);
@@ -330,6 +351,8 @@ export default function InvoiceEditPage() {
 
   // Tax controls
   const [taxType, setTaxType] = useState<TaxType>("CGST_SGST");
+  // true = tax INCLUDED within the grand total; false = ADDED on top.
+  const [taxInclusive, setTaxInclusive] = useState<boolean>(true);
   const [cgstPercent, setCgstPercent] = useState<number>(9);
   const [sgstPercent, setSgstPercent] = useState<number>(9);
   const [igstPercent, setIgstPercent] = useState<number>(18);
@@ -469,6 +492,7 @@ export default function InvoiceEditPage() {
 
         const tt = ((inv as any).tax_type ?? "CGST_SGST") as TaxType;
         setTaxType(tt);
+        setTaxInclusive((inv as any).tax_inclusive ?? true);
         setCgstPercent(Number((inv as any).cgst_percent ?? 9));
         setSgstPercent(Number((inv as any).sgst_percent ?? 9));
         setIgstPercent(Number((inv as any).igst_percent ?? 18));
@@ -714,8 +738,16 @@ export default function InvoiceEditPage() {
         cgstPercent,
         sgstPercent,
         igstPercent,
+        taxInclusive,
       ),
-    [activeTotals.amountAfterDiscount, taxType, cgstPercent, sgstPercent, igstPercent],
+    [
+      activeTotals.amountAfterDiscount,
+      taxType,
+      taxInclusive,
+      cgstPercent,
+      sgstPercent,
+      igstPercent,
+    ],
   );
 
   // ===== Custom item ops =====
@@ -1089,6 +1121,7 @@ export default function InvoiceEditPage() {
           subtotal: activeTotals.subtotal,
           discount_total: activeTotals.discountTotal,
           tax_type: taxType,
+          tax_inclusive: taxInclusive,
           cgst_percent: taxType === "CGST_SGST" ? cgstPercent : 0,
           sgst_percent: taxType === "CGST_SGST" ? sgstPercent : 0,
           igst_percent: taxType === "IGST" ? igstPercent : 0,
@@ -1265,23 +1298,14 @@ export default function InvoiceEditPage() {
                 </Button>
               </div>
             </div>
-            <select
+            <AddressSearchSelect
+              addresses={addresses}
               value={selectedAddressId}
-              onChange={(e) => {
-                const id = e.target.value;
+              onSelect={(id, addr) => {
                 setSelectedAddressId(id);
-                const addr = addresses.find((a) => a.id === id);
                 if (addr) applyAddressToCustomerFields(addr);
               }}
-              className="w-full rounded-md border px-3 py-2"
-            >
-              <option value="">Select saved address</option>
-              {addresses.map((a) => (
-                <option key={a.id} value={a.id}>
-                  {a.label} — {a.city}
-                </option>
-              ))}
-            </select>
+            />
             <p className="mt-1 text-xs text-muted-foreground">
               Select an address to auto-fill Customer Details and Billing Address.
             </p>
@@ -1827,6 +1851,22 @@ export default function InvoiceEditPage() {
                   <option value="NONE">No Tax</option>
                 </select>
               </div>
+
+              {taxType !== "NONE" && (
+                <div className="mt-2 flex items-center justify-between gap-2">
+                  <span className="text-muted-foreground">In grand total</span>
+                  <select
+                    value={taxInclusive ? "inclusive" : "exclusive"}
+                    onChange={(e) =>
+                      setTaxInclusive(e.target.value === "inclusive")
+                    }
+                    className="border rounded-md px-2 py-1 text-sm"
+                  >
+                    <option value="inclusive">Included (within total)</option>
+                    <option value="exclusive">Excluded (added on top)</option>
+                  </select>
+                </div>
+              )}
 
               {taxType === "CGST_SGST" && (
                 <div className="mt-2 grid grid-cols-2 gap-2">
