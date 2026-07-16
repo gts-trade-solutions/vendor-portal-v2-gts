@@ -75,6 +75,10 @@ export async function GET(req: NextRequest) {
       const where: any = { vendor_id: vendorId, unit_code: code };
       if (status) where.status = status;
       if (soldInvoiceId) where.sold_invoice_id = soldInvoiceId;
+      // When asking for AVAILABLE stock (IN_STOCK), never surface a unit that is
+      // still linked to an invoice — such orphans read as in-stock but the invoice
+      // save would reject them. Requiring no invoice_units link keeps the pool clean.
+      if (status === "IN_STOCK" && !soldInvoiceId) where.invoice_units = { is: null };
       const row = await prisma.inventory_units.findFirst({
         where,
         select: {
@@ -98,6 +102,8 @@ export async function GET(req: NextRequest) {
       const where: any = { vendor_id: vendorId, scan_code: code };
       if (status) where.status = status;
       if (soldInvoiceId) where.sold_invoice_id = soldInvoiceId;
+      // Available-stock pool must exclude units still linked to an invoice (orphans).
+      if (status === "IN_STOCK" && !soldInvoiceId) where.invoice_units = { is: null };
       const rows = await prisma.inventory_units.findMany({
         where,
         select: {

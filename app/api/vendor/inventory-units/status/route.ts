@@ -52,6 +52,34 @@ export async function POST(req: Request) {
     if (!productId) return json({ ok: false, error: "MISSING_PRODUCT_ID" }, 400);
     if (!VALID.has(status)) return json({ ok: false, error: "INVALID_STATUS" }, 400);
 
+    // Invariant guard: a unit that is on an invoice (invoice_units link) must stay
+    // SOLD. Flipping such a unit to IN_STOCK/DEMO/RETURNED/etc. used to leave the
+    // invoice_units link behind — the unit then read as available stock while still
+    // attached to an invoice (the "these units are linked to another invoice" bug).
+    // Block any non-SOLD transition for linked units and tell the user to remove
+    // them from the invoice first, so status and invoice links never diverge.
+    if (status !== "SOLD") {
+      const linked = await prisma.invoice_units.findMany({
+        where: { unit_id: { in: ids }, inventory_units: { vendor_id: vendorId } },
+        select: { unit_code: true, invoices: { select: { invoice_number: true } } },
+      });
+      if (linked.length) {
+        const invs = Array.from(
+          new Set(linked.map((l) => l.invoices?.invoice_number).filter(Boolean)),
+        );
+        const codes = linked.map((l) => l.unit_code).slice(0, 15).join(", ");
+        return json(
+          {
+            ok: false,
+            error:
+              `${linked.length} unit(s) are on invoice ${invs.join(", ")} and cannot be moved to ${status}. ` +
+              `Remove them from the invoice first, then change their status. (${codes}${linked.length > 15 ? ", …" : ""})`,
+          },
+          400,
+        );
+      }
+    }
+
     const data: Record<string, any> = { status };
 
     if (status === "SOLD" && body?.sold) {
