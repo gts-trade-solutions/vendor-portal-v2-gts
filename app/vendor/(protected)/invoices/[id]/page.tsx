@@ -606,6 +606,19 @@ export default function InvoiceViewPage() {
     );
   }
 
+  // Split line items into real products (have a product_id) vs. non-product
+  // "additional charges" (freight, packing, stands, etc. — saved with
+  // product_id = null via the "Add charge" flow). Charges render in their own
+  // block near the totals instead of polluting the goods table. Only split when
+  // the invoice actually has BOTH kinds; a fully-custom/manual invoice (no
+  // product lines) keeps every row in the table unchanged. Totals are computed
+  // over all items either way, so the grand total never changes.
+  const productItems = items.filter((it) => it.product_id);
+  const chargeItems = items.filter((it) => !it.product_id);
+  const splitCharges = productItems.length > 0 && chargeItems.length > 0;
+  const tableItems = splitCharges ? productItems : items;
+  const chargeRows = splitCharges ? chargeItems : [];
+
   const SummaryStrip = () => (
     <div className="border border-slate-300 rounded-md bg-muted/20 p-3 text-sm">
       <div className="grid grid-cols-2 gap-y-1">
@@ -1026,7 +1039,7 @@ export default function InvoiceViewPage() {
               </thead>
 
               <tbody>
-                {items.map((it, idx) => {
+                {tableItems.map((it, idx) => {
                   const lineBaseAmount = getLineBaseAmount(it);
                   const totalDiscountApplied = round2(Number(it.discount || 0));
                   const lineDiscountPercent = getLineDiscountPercent(it);
@@ -1065,6 +1078,41 @@ export default function InvoiceViewPage() {
               </tbody>
             </table>
           </div>
+
+          {/* Additional charges (non-product lines) — kept out of the goods
+              table and shown as their own block. Their amounts are already
+              included in the totals below. */}
+          {chargeRows.length > 0 && (
+            <div className="print-order-1 order-1 border border-slate-300 rounded-md overflow-hidden">
+              <table className="w-full text-sm">
+                <thead className="bg-muted">
+                  <tr>
+                    <th className="px-2 py-2 text-left">Additional Charges</th>
+                    <th className="px-2 py-2 text-right w-[120px]">Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {chargeRows.map((c) => {
+                    const amt = round2(
+                      getLineBaseAmount(c) - round2(Number(c.discount || 0)),
+                    );
+                    return (
+                      <tr key={c.id} className="border-t">
+                        <td className="px-2 py-2">
+                          <div className="break-words font-medium text-[10.5px] leading-[1.15]">
+                            {c.description}
+                          </div>
+                        </td>
+                        <td className="px-2 py-2 text-right font-medium">
+                          {formatINR(amt)}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
 
           {/* Totals strip */}
           <div className="print-order-2 order-2 flex justify-end">
