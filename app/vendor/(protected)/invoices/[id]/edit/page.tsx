@@ -592,11 +592,31 @@ export default function InvoiceEditPage() {
           };
         });
 
-        // restore overrides from invoice_items (unit_price + discount)
+        // Map a scanned unit's product NAME -> product_id, so we can recover the
+        // right product for a legacy invoice_item that lost its product_id but
+        // still names a product that IS on the invoice (as scanned units). This
+        // is what makes the edit page self-heal: such an item's rate/discount is
+        // restored onto its product line (below), and it is NOT re-counted as an
+        // additional charge (which is what doubled the totals on save).
+        const norm = (s: string) =>
+          (s || "").toLowerCase().replace(/\s+/g, " ").trim();
+        const nameToProductId = new Map<string, string>();
+        for (const u of builtUnits) {
+          if (u.product_id && u.product_name) {
+            nameToProductId.set(norm(u.product_name), u.product_id);
+          }
+        }
+        // Resolve an item's product id: its own, else by matching a unit product.
+        const resolveProductId = (it: any): string | null =>
+          it.product_id || nameToProductId.get(norm(it.description)) || null;
+
+        // restore overrides from invoice_items (unit_price + discount), keyed by
+        // the resolved product id so name-only-matched items land correctly too.
         const ov: Record<string, LineOverride> = {};
         for (const it of mappedItems) {
-          if (!it.product_id) continue;
-          ov[it.product_id] = {
+          const pid = resolveProductId(it);
+          if (!pid) continue;
+          ov[pid] = {
             rate: Number(it.unit_price ?? 0),
             discountPercent: discountPercentFromStored(
               Number(it.discount ?? 0),
@@ -607,10 +627,11 @@ export default function InvoiceEditPage() {
           };
         }
 
-        // Capture non-product lines (freight/packing/etc.) so we can edit them
-        // and re-save them instead of dropping them.
+        // Capture genuine non-product lines (freight/packing/etc.) so we can edit
+        // and re-save them. Items that resolve to a scanned-unit product are NOT
+        // charges — they are product lines already represented by the units.
         const chargeLines = mappedItems
-          .filter((it) => !it.product_id)
+          .filter((it) => !resolveProductId(it))
           .map((it) => ({
             id: it.id || crypto.randomUUID(),
             description: it.description || "",
