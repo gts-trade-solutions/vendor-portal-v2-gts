@@ -64,6 +64,7 @@ export async function GET(req: NextRequest) {
           subtotal: true,
           discount_total: true,
           tax_type: true,
+          tax_inclusive: true,
           cgst_percent: true,
           sgst_percent: true,
           igst_percent: true,

@@ -48,6 +48,7 @@ type InvoiceRow = {
   discount_total?: number | null;
 
   tax_type?: "CGST_SGST" | "IGST" | "NONE" | null;
+  tax_inclusive?: boolean | null;
   cgst_percent?: number | null;
   sgst_percent?: number | null;
   igst_percent?: number | null;
@@ -136,8 +137,22 @@ function round2(value: number) {
   return Math.round((Number(value) + Number.EPSILON) * 100) / 100;
 }
 
-function calculateInclusiveTaxSplit(invoiceAmount: number, taxType: InvoiceRow["tax_type"], cgstPercent: number, sgstPercent: number, igstPercent: number) {
+function calculateTaxSplit(invoiceAmount: number, taxType: InvoiceRow["tax_type"], cgstPercent: number, sgstPercent: number, igstPercent: number, inclusive: boolean = true) {
   const safeInvoiceAmount = round2(invoiceAmount);
+
+  // EXCLUSIVE: `invoiceAmount` is the pre-tax base and the tax is added ON TOP,
+  // so the grand total is greater than the base. INCLUSIVE (the branches below):
+  // the tax is already contained in `invoiceAmount`, so it is merely extracted
+  // and the grand total equals the amount. This must mirror the edit page's
+  // extractInclusiveTaxAmounts() exactly, or the printed invoice and the editor
+  // disagree on the same invoice (the 6431-vs-5450 bug).
+  if (!inclusive) {
+    const cgst = taxType === "CGST_SGST" ? round2((safeInvoiceAmount * cgstPercent) / 100) : 0;
+    const sgst = taxType === "CGST_SGST" ? round2((safeInvoiceAmount * sgstPercent) / 100) : 0;
+    const igst = taxType === "IGST" ? round2((safeInvoiceAmount * igstPercent) / 100) : 0;
+    const taxTotal = round2(cgst + sgst + igst);
+    return { taxableAmount: safeInvoiceAmount, cgst, sgst, igst, taxTotal, grandTotal: round2(safeInvoiceAmount + taxTotal) };
+  }
 
   if (taxType === "CGST_SGST") {
     const totalRate = cgstPercent + sgstPercent;
@@ -407,10 +422,17 @@ export default function InvoiceViewPage() {
         ? subtotalFromItems
         : round2(Number(invoice?.subtotal ?? 0));
 
+    // Prefer the header-level discount_total when it exceeds the sum of the
+    // per-line discounts. Some invoices carry a whole-invoice discount that is
+    // NOT distributed onto line items (line discounts stay 0) — reading only the
+    // line discounts there under-counts the discount and inflates the total,
+    // diverging from the stored grand_total (the 1500-vs-6000 header-discount
+    // bug). For normal invoices header == line sum, so max() is a no-op.
+    const headerDiscount = round2(Number(invoice?.discount_total ?? 0));
     const discountTotal =
       items.length > 0
-        ? discountFromItems
-        : round2(Number(invoice?.discount_total ?? 0));
+        ? Math.max(discountFromItems, headerDiscount)
+        : headerDiscount;
 
     const invoiceAmount = round2(Math.max(subtotal - discountTotal, 0));
 
@@ -422,13 +444,17 @@ export default function InvoiceViewPage() {
     const cgstPercent = Number(invoice?.cgst_percent ?? 0);
     const sgstPercent = Number(invoice?.sgst_percent ?? 0);
     const igstPercent = Number(invoice?.igst_percent ?? 0);
+    // Default to inclusive (matches the editor default) when the flag is unset.
+    const taxInclusive =
+      invoice?.tax_inclusive == null ? true : !!invoice.tax_inclusive;
 
-    const taxSplit = calculateInclusiveTaxSplit(
+    const taxSplit = calculateTaxSplit(
       invoiceAmount,
       taxType,
       cgstPercent,
       sgstPercent,
       igstPercent,
+      taxInclusive,
     );
 
     return {
