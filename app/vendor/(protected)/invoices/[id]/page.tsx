@@ -474,8 +474,14 @@ export default function InvoiceViewPage() {
   }, [items, invoice]);
 
   // --- Payment derived values + actions ---
-  const grandTotalValue = Number(
-    invoice?.grand_total ?? invoice?.total_amount ?? computed.grandTotal,
+  // Grand total is rounded to the nearest rupee (>= .50 rounds up, < .50 down).
+  // The paise delta is surfaced as a "Round Off" line so the invoice still
+  // balances (taxable + tax + round-off = grand total). Rounding the stored
+  // value too means older invoices also display/settle on the whole rupee.
+  const grandRounded = Math.round(computed.grandTotal);
+  const roundOff = round2(grandRounded - computed.grandTotal);
+  const grandTotalValue = Math.round(
+    Number(invoice?.grand_total ?? invoice?.total_amount ?? computed.grandTotal),
   );
   const amountPaid = Number(invoice?.amount_paid ?? 0);
   const outstanding = round2(Math.max(grandTotalValue - amountPaid, 0));
@@ -688,9 +694,16 @@ export default function InvoiceViewPage() {
           </>
         ) : null}
 
+        {roundOff !== 0 ? (
+          <>
+            <div className="text-muted-foreground">Round Off</div>
+            <div className="text-right">{formatINR(roundOff)}</div>
+          </>
+        ) : null}
+
         <div className="col-span-2 border-t mt-2 pt-2 flex justify-between font-semibold text-base">
           <span>Invoice Amount</span>
-          <span>{formatINR(computed.grandTotal)}</span>
+          <span>{formatINR(grandRounded)}</span>
         </div>
 
         {amountPaid > 0 && (
@@ -1151,7 +1164,7 @@ export default function InvoiceViewPage() {
           <div className="print-order-2 order-2 text-sm">
             <span className="text-muted-foreground">Amount in words: </span>
             <span className="font-medium">
-              {numberToIndianWords(computed.grandTotal)}
+              {numberToIndianWords(grandRounded)}
             </span>
           </div>
 

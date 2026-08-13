@@ -75,7 +75,8 @@ function formatDate(value?: string | null) {
 }
 
 function getOutstanding(inv: InvoiceRow) {
-  const grand = Number(inv.grand_total ?? inv.total_amount ?? 0);
+  // Grand total is displayed/settled on the nearest rupee (see invoice pages).
+  const grand = Math.round(Number(inv.grand_total ?? inv.total_amount ?? 0));
   const paid = Number(inv.amount_paid ?? 0);
   return Math.max(grand - paid, 0);
 }
@@ -443,7 +444,7 @@ export default function InvoicesListPage() {
   // download as XLSX.
   const exportRows = (rows: InvoiceRow[], filename: string) => {
     const sheet: Record<string, string | number>[] = rows.map((inv) => {
-      const billed = Number(inv.grand_total ?? inv.total_amount ?? 0);
+      const billed = Math.round(Number(inv.grand_total ?? inv.total_amount ?? 0));
       const paid = Number(inv.amount_paid ?? 0);
       return {
         "Invoice#": inv.invoice_number || "",
@@ -460,7 +461,7 @@ export default function InvoicesListPage() {
 
     const totals = rows.reduce(
       (acc, inv) => {
-        const billed = Number(inv.grand_total ?? inv.total_amount ?? 0);
+        const billed = Math.round(Number(inv.grand_total ?? inv.total_amount ?? 0));
         const paid = Number(inv.amount_paid ?? 0);
         acc.billed += billed;
         acc.paid += paid;
@@ -877,7 +878,7 @@ export default function InvoicesListPage() {
                           {inv.customer_name || "-"}
                         </td>
                         <td className="px-4 py-3 align-middle text-right font-medium text-slate-900">
-                          {formatCurrency(inv.grand_total ?? inv.total_amount)}
+                          {formatCurrency(Math.round(Number(inv.grand_total ?? inv.total_amount ?? 0)))}
                         </td>
                         <td className="px-4 py-3 align-middle text-right text-slate-700">
                           {getOutstanding(inv) > 0

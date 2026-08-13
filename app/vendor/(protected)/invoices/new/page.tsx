@@ -116,7 +116,7 @@ type InvoiceLine = {
 };
 
 const DEFAULT_NOTES = `Payment Terms
-• Payment is due within 30 days from the invoice date.
+• Immediate payment.
 
 Reseller Disclaimer
 We are resellers and are not responsible for product usage or handling guidance. For detailed information on how to use the product safely and effectively, please contact the product manufacturer directly.
@@ -748,6 +748,13 @@ export default function NewInvoicePage() {
     });
   }, [invoiceAmount, taxType, taxInclusive, cgstPercent, sgstPercent, igstPercent]);
 
+  // Grand total rounded to the nearest rupee (>= .50 rounds up, < .50 down).
+  // The paise delta is the "Round Off" adjustment; the rounded value is what we
+  // display and persist (grand_total/total_amount) so it stays consistent
+  // everywhere the total is shown or the outstanding is computed.
+  const grandTotalRounded = Math.round(grandTotal);
+  const roundOff = round2(grandTotalRounded - grandTotal);
+
   // Reset the form for the next invoice (keeps company / tax / notes / dates).
   const resetForNew = () => {
     setScannedUnits([]);
@@ -894,8 +901,8 @@ export default function NewInvoicePage() {
           sgst_amount: sgstAmount,
           igst_amount: igstAmount,
           tax_amount: taxTotal,
-          grand_total: grandTotal,
-          total_amount: grandTotal,
+          grand_total: grandTotalRounded,
+          total_amount: grandTotalRounded,
           notes: notes || null,
           is_custom: isCustom,
           bill_to_address_id: selectedAddressId || null,
@@ -1714,13 +1721,20 @@ export default function NewInvoicePage() {
                 </div>
               )}
 
+              {roundOff !== 0 && (
+                <div className="flex w-full max-w-sm justify-between">
+                  <span>Round Off</span>
+                  <span>{fmtINR(roundOff)}</span>
+                </div>
+              )}
+
               <div className="flex w-full max-w-sm justify-between font-semibold border-t pt-2 mt-2">
                 <span>Invoice Amount</span>
-                <span>{fmtINR(grandTotal)}</span>
+                <span>{fmtINR(grandTotalRounded)}</span>
               </div>
 
               <div className="w-full max-w-sm pt-1 text-right text-xs text-muted-foreground">
-                {numberToIndianWords(grandTotal)}
+                {numberToIndianWords(grandTotalRounded)}
               </div>
             </div>
 
@@ -1828,7 +1842,7 @@ export default function NewInvoicePage() {
       <div className="sticky bottom-4 z-20 rounded-xl border bg-background/95 p-3 shadow-lg backdrop-blur">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="text-sm">
-            <span className="text-lg font-bold">{fmtINR(grandTotal)}</span>
+            <span className="text-lg font-bold">{fmtINR(grandTotalRounded)}</span>
             <span className="ml-2 text-muted-foreground">
               {scannedLines.length + extraCharges.length} item
               {scannedLines.length + extraCharges.length === 1 ? "" : "s"} ·{" "}

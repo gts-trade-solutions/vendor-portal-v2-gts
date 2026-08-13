@@ -39,7 +39,8 @@ export function buildInvoiceEmail({
   kind: "invoice" | "reminder" | "warning";
 }): { subject: string; html: string; text: string } {
   const sellerName = company?.display_name || "Made in Korea";
-  const grandTotal = Number(invoice.grand_total ?? invoice.total_amount ?? 0);
+  // Grand total is settled on the nearest rupee, matching the printed invoice.
+  const grandTotal = Math.round(Number(invoice.grand_total ?? invoice.total_amount ?? 0));
   const amountPaid = Number(invoice.amount_paid ?? 0);
   const outstanding = Math.max(grandTotal - amountPaid, 0);
 

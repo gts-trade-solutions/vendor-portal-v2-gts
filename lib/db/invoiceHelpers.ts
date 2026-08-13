@@ -46,7 +46,10 @@ export async function recomputeInvoicePayment(
     where: { id: invoiceId },
     select: { grand_total: true, total_amount: true, paid_at: true },
   });
-  const total = Number(inv?.grand_total ?? inv?.total_amount ?? 0);
+  // Compare against the rounded grand total (invoices settle on the nearest
+  // rupee) so paying the shown outstanding marks the invoice PAID, not a ghost
+  // 0.xx-short PARTIAL — including for older invoices stored with paise.
+  const total = Math.round(Number(inv?.grand_total ?? inv?.total_amount ?? 0));
   let status: "UNPAID" | "PARTIAL" | "PAID" = "UNPAID";
   if (amountPaid <= 0) status = "UNPAID";
   else if (Math.round(amountPaid * 100) >= Math.round(total * 100)) status = "PAID";

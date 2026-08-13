@@ -771,6 +771,11 @@ export default function InvoiceEditPage() {
     ],
   );
 
+  // Grand total rounded to the nearest rupee (>= .50 up, < .50 down); the paise
+  // delta is the "Round Off" line. The rounded value is displayed and persisted.
+  const grandTotalRounded = Math.round(grandTotal);
+  const roundOff = round2(grandTotalRounded - grandTotal);
+
   // ===== Custom item ops =====
   const updateItem = (id: string, patch: Partial<InvoiceItemRow>) => {
     setItems((prev) => prev.map((it) => (it.id === id ? { ...it, ...patch } : it)));
@@ -1150,8 +1155,8 @@ export default function InvoiceEditPage() {
           sgst_amount: sgstAmount,
           igst_amount: igstAmount,
           tax_amount: taxTotal,
-          grand_total: grandTotal,
-          total_amount: grandTotal,
+          grand_total: grandTotalRounded,
+          total_amount: grandTotalRounded,
           is_custom: isCustom,
         },
         items: allItems,
@@ -1846,13 +1851,20 @@ export default function InvoiceEditPage() {
                 </div>
               )}
 
+              {roundOff !== 0 && (
+                <div className="flex w-full max-w-sm justify-between">
+                  <span>Round Off</span>
+                  <span>{fmtINR(roundOff)}</span>
+                </div>
+              )}
+
               <div className="flex w-full max-w-sm justify-between font-semibold border-t pt-2 mt-2">
                 <span>Invoice Amount</span>
-                <span>{fmtINR(grandTotal)}</span>
+                <span>{fmtINR(grandTotalRounded)}</span>
               </div>
 
               <div className="w-full max-w-sm pt-1 text-right text-xs text-muted-foreground">
-                {numberToIndianWords(grandTotal)}
+                {numberToIndianWords(grandTotalRounded)}
               </div>
             </div>
 
@@ -1943,7 +1955,7 @@ export default function InvoiceEditPage() {
       <div className="sticky bottom-4 z-20 rounded-xl border bg-background/95 p-3 shadow-lg backdrop-blur">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="text-sm">
-            <span className="text-lg font-bold">{fmtINR(grandTotal)}</span>
+            <span className="text-lg font-bold">{fmtINR(grandTotalRounded)}</span>
             <span className="ml-2 text-muted-foreground">
               {(isCustom ? items.length : scannedLines.length + extraCharges.length)}{" "}
               line items
