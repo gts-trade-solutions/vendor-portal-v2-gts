@@ -44,7 +44,20 @@ export async function POST(req: NextRequest) {
   }
 
   const items: any[] = Array.isArray(payload.items) ? payload.items : [];
-  const units: any[] = Array.isArray(payload.units) ? payload.units : [];
+  // Dedupe units by unit_id. The same physical inventory unit must never appear
+  // twice on one invoice; a duplicate (e.g. a double barcode scan / rapid submit
+  // racing the form's stale-state dedup) would otherwise crash
+  // invoice_units.createMany() on the invoice_units_unit_id_uniq unique index
+  // with a raw 500. The "already linked" check below only compares against
+  // existing DB rows, so it can't catch a duplicate inside this same payload.
+  const rawUnits: any[] = Array.isArray(payload.units) ? payload.units : [];
+  const seenUnitIds = new Set<string>();
+  const units: any[] = [];
+  for (const u of rawUnits) {
+    if (!u || !u.unit_id || seenUnitIds.has(u.unit_id)) continue;
+    seenUnitIds.add(u.unit_id);
+    units.push(u);
+  }
   const unitIds: string[] = units.map((u) => u.unit_id);
 
   // Auto-numbered invoices can collide on the unique invoice_number under
@@ -182,12 +195,21 @@ export async function POST(req: NextRequest) {
         result = result0;
         break;
       } catch (e: any) {
-        if (
+        const p2002 =
           e instanceof Prisma.PrismaClientKnownRequestError &&
-          e.code === "P2002" &&
-          autoNumbered &&
-          attempt < 4
-        ) {
+          e.code === "P2002";
+        const target = p2002
+          ? JSON.stringify((e as any).meta?.target ?? "")
+          : "";
+        const unitDup = p2002 && /unit_id|invoice_units/i.test(target);
+        // A unit_id collision can't be fixed by regenerating the invoice number —
+        // surface it as a clean 400 instead of retrying then throwing a raw 500.
+        if (unitDup) {
+          throw new HttpError(
+            "One or more scanned units are already linked to another invoice. Please refresh, re-scan, and try again.",
+          );
+        }
+        if (p2002 && autoNumbered && attempt < 4) {
           continue; // invoice_number collision — regenerate a number and retry
         }
         throw e;

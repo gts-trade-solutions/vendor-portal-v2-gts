@@ -466,24 +466,32 @@ export default function NewInvoicePage() {
       const brandName = product?.brands?.name || "";
       const rate = Number(product.compare_at_price ?? product.price ?? 0);
 
-      setScannedUnits((prev) => [
-        ...prev,
-        {
-          unit_id: unit.id,
-          unit_code: unit.unit_code,
-          scan_code: unit.scan_code || unit.unit_code,
-          display_code: getPublicScanCode(unit),
-          allocation_mode:
-            unit.scan_code && unit.scan_code !== unit.unit_code
-              ? "shared_scan"
-              : "legacy_exact",
-          product_id: product.id,
-          product_name: product.name ?? "",
-          brand_name: brandName,
-          hsn: product.hsn ?? "",
-          rate,
-        },
-      ]);
+      // Functional update + dedupe guard: two rapid scans can each capture the
+      // same stale `scannedUnits` closure and append the same unit, which would
+      // inflate totals and crash invoice_units on save. Skipping when the unit is
+      // already present keeps state (and the payload) free of duplicate unit_ids.
+      setScannedUnits((prev) =>
+        prev.some((u) => u.unit_id === unit.id)
+          ? prev
+          : [
+              ...prev,
+              {
+                unit_id: unit.id,
+                unit_code: unit.unit_code,
+                scan_code: unit.scan_code || unit.unit_code,
+                display_code: getPublicScanCode(unit),
+                allocation_mode:
+                  unit.scan_code && unit.scan_code !== unit.unit_code
+                    ? "shared_scan"
+                    : "legacy_exact",
+                product_id: product.id,
+                product_name: product.name ?? "",
+                brand_name: brandName,
+                hsn: product.hsn ?? "",
+                rate,
+              },
+            ],
+      );
       setScanCode("");
       setScanQty(1);
       setScanAvailability("1 unit selected.");
@@ -544,7 +552,11 @@ export default function NewInvoicePage() {
       };
     });
 
-    setScannedUnits((prev) => [...prev, ...nextUnits]);
+    setScannedUnits((prev) => {
+      // Drop any unit already selected (rapid-scan race guard — see legacy path).
+      const have = new Set(prev.map((u) => u.unit_id));
+      return [...prev, ...nextUnits.filter((u) => !have.has(u.unit_id))];
+    });
     setScanAvailability(
       picked.length < requestedQty
         ? `Only ${picked.length} selected. ${availableCount - picked.length} remaining after this add.`

@@ -33,7 +33,16 @@ export async function POST(req: NextRequest) {
 
   const h = payload?.header || {};
   const items: any[] = Array.isArray(payload?.items) ? payload.items : [];
-  const units: any[] = Array.isArray(payload?.units) ? payload.units : [];
+  // Dedupe units by unit_id (see create route): a duplicate unit in the payload
+  // would crash invoice_units.createMany() on invoice_units_unit_id_uniq.
+  const rawUnits: any[] = Array.isArray(payload?.units) ? payload.units : [];
+  const seenUnitIds = new Set<string>();
+  const units: any[] = [];
+  for (const u of rawUnits) {
+    if (!u || !u.unit_id || seenUnitIds.has(u.unit_id)) continue;
+    seenUnitIds.add(u.unit_id);
+    units.push(u);
+  }
   const newIds: string[] = units.map((u) => u.unit_id);
 
   try {
@@ -232,6 +241,20 @@ export async function POST(req: NextRequest) {
   } catch (e: any) {
     if (e instanceof HttpError) {
       return NextResponse.json({ ok: false, error: e.message }, { status: 400 });
+    }
+    if (
+      e instanceof Prisma.PrismaClientKnownRequestError &&
+      e.code === "P2002" &&
+      /unit_id|invoice_units/i.test(JSON.stringify((e as any).meta?.target ?? ""))
+    ) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error:
+            "One or more scanned units are already linked to another invoice. Please refresh and try again.",
+        },
+        { status: 400 },
+      );
     }
     console.error("vendor/invoices/update error", e);
     return NextResponse.json(

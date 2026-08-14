@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { useVendorRole } from "@/lib/hooks/useVendorRole";
 import { getInventoryCodeMode, getPublicScanCode } from "@/lib/inventoryUnitCodes";
 import { QRCodeSVG } from "qrcode.react";
@@ -300,6 +301,13 @@ export default function InvoiceViewPage() {
     null,
   );
   const [duplicating, setDuplicating] = useState(false);
+
+  // Inline note editing (view page). The New/Edit forms already own the note at
+  // creation time; this lets an owner/manager tweak it afterwards without
+  // reopening the full editor. Persisted via the notes-only endpoint.
+  const [editingNote, setEditingNote] = useState(false);
+  const [noteDraft, setNoteDraft] = useState("");
+  const [savingNote, setSavingNote] = useState(false);
 
   const load = useCallback(async () => {
     if (!invoiceId) return;
@@ -722,6 +730,29 @@ export default function InvoiceViewPage() {
       </div>
     </div>
   );
+
+  async function saveNote() {
+    if (!invoice) return;
+    setSavingNote(true);
+    try {
+      const res = await fetch("/api/vendor/invoices/notes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ invoice_id: invoice.id, notes: noteDraft }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || !json?.ok)
+        throw new Error(json?.error || "Failed to save note");
+      const nextNotes = noteDraft.trim() ? noteDraft : null;
+      setInvoice((prev) => (prev ? { ...prev, notes: nextNotes } : prev));
+      setEditingNote(false);
+      toast.success("Note updated");
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to save note");
+    } finally {
+      setSavingNote(false);
+    }
+  }
 
   const NotesAndSignature = () => (
     <>
@@ -1251,12 +1282,52 @@ export default function InvoiceViewPage() {
 <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3 print:grid-cols-3 items-stretch">
   {/* Notes: 2/3 */}
   <div className="md:col-span-2 print:col-span-2 flex flex-col">
-    <div className="text-xs font-semibold mb-1">Notes</div>
-
-    {/* ✅ h-full + flex-1 makes it match right side height */}
-    <div className="flex-1 min-h-[120px] rounded-md border border-slate-300 p-3 text-xs whitespace-pre-line">
-      {notes || "—"}
+    <div className="mb-1 flex items-center justify-between">
+      <div className="text-xs font-semibold">Notes</div>
+      {isAdmin && !editingNote && (
+        <button
+          type="button"
+          onClick={() => {
+            setNoteDraft(invoice?.notes || "");
+            setEditingNote(true);
+          }}
+          className="print-hidden text-[11px] font-medium text-blue-600 hover:underline"
+        >
+          Edit
+        </button>
+      )}
     </div>
+
+    {editingNote ? (
+      // On-screen editor (never printed). Blank + Save clears the note.
+      <div className="print-hidden flex flex-1 flex-col gap-2">
+        <Textarea
+          rows={5}
+          value={noteDraft}
+          onChange={(e) => setNoteDraft(e.target.value)}
+          className="flex-1 text-xs"
+          placeholder="Enter invoice notes (leave blank to clear)"
+        />
+        <div className="flex items-center gap-2">
+          <Button size="sm" onClick={saveNote} disabled={savingNote}>
+            {savingNote ? "Saving..." : "Save note"}
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setEditingNote(false)}
+            disabled={savingNote}
+          >
+            Cancel
+          </Button>
+        </div>
+      </div>
+    ) : (
+      /* ✅ h-full + flex-1 makes it match right side height */
+      <div className="flex-1 min-h-[120px] rounded-md border border-slate-300 p-3 text-xs whitespace-pre-line">
+        {notes || "—"}
+      </div>
+    )}
   </div>
 
   {/* Signatory: 1/3 */}

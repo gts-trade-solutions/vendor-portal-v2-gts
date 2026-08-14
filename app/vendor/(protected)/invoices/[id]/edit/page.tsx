@@ -917,21 +917,27 @@ export default function InvoiceEditPage() {
       const product = productMap.get(unit.product_id);
       if (!product) return setError("Product not found for unit.");
 
-      setScannedUnits((prev) => [
-        ...prev,
-        {
-          unit_id: unit.id,
-          unit_code: unit.unit_code,
-          scan_code: unit.scan_code || unit.unit_code,
-          display_code: getPublicScanCode(unit),
-          allocation_mode: unit.scan_code && unit.scan_code !== unit.unit_code ? "shared_scan" : "legacy_exact",
-          product_id: unit.product_id,
-          product_name: product?.name ?? "",
-          brand_name: product?.brands?.name ?? "",
-          hsn: product?.hsn ?? "",
-          base_rate: Number(product?.compare_at_price ?? product?.price ?? 0),
-        },
-      ]);
+      // Functional update + dedupe guard (see new-invoice page): prevents a
+      // rapid-scan stale-closure race from adding the same unit twice.
+      setScannedUnits((prev) =>
+        prev.some((u) => u.unit_id === unit.id)
+          ? prev
+          : [
+              ...prev,
+              {
+                unit_id: unit.id,
+                unit_code: unit.unit_code,
+                scan_code: unit.scan_code || unit.unit_code,
+                display_code: getPublicScanCode(unit),
+                allocation_mode: unit.scan_code && unit.scan_code !== unit.unit_code ? "shared_scan" : "legacy_exact",
+                product_id: unit.product_id,
+                product_name: product?.name ?? "",
+                brand_name: product?.brands?.name ?? "",
+                hsn: product?.hsn ?? "",
+                base_rate: Number(product?.compare_at_price ?? product?.price ?? 0),
+              },
+            ],
+      );
 
       setScanCode("");
       setScanQty(1);
@@ -987,24 +993,28 @@ export default function InvoiceEditPage() {
     const picked = allocatable.slice(0, requestedQty);
     const productMap = await fetchProductsByIds(picked.map((row: any) => row.product_id));
 
-    setScannedUnits((prev) => [
-      ...prev,
-      ...picked.map((row: any) => {
-        const product = productMap.get(row.product_id);
-        return {
-          unit_id: row.id,
-          unit_code: row.unit_code,
-          scan_code: row.scan_code || row.unit_code,
-          display_code: getPublicScanCode(row),
-          allocation_mode: "shared_scan" as InventoryCodeMode,
-          product_id: row.product_id,
-          product_name: product?.name ?? "",
-          brand_name: product?.brands?.name ?? "",
-          hsn: product?.hsn ?? "",
-          base_rate: Number(product?.compare_at_price ?? product?.price ?? 0),
-        };
-      }),
-    ]);
+    setScannedUnits((prev) => {
+      // Drop any unit already selected (rapid-scan race guard — see legacy path).
+      const have = new Set(prev.map((u) => u.unit_id));
+      const additions = picked
+        .filter((row: any) => !have.has(row.id))
+        .map((row: any) => {
+          const product = productMap.get(row.product_id);
+          return {
+            unit_id: row.id,
+            unit_code: row.unit_code,
+            scan_code: row.scan_code || row.unit_code,
+            display_code: getPublicScanCode(row),
+            allocation_mode: "shared_scan" as InventoryCodeMode,
+            product_id: row.product_id,
+            product_name: product?.name ?? "",
+            brand_name: product?.brands?.name ?? "",
+            hsn: product?.hsn ?? "",
+            base_rate: Number(product?.compare_at_price ?? product?.price ?? 0),
+          };
+        });
+      return [...prev, ...additions];
+    });
 
     setScanAvailability(
       picked.length < requestedQty
