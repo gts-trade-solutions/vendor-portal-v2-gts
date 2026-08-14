@@ -42,7 +42,9 @@ export function buildInvoiceEmail({
   // Grand total is settled on the nearest rupee, matching the printed invoice.
   const grandTotal = Math.round(Number(invoice.grand_total ?? invoice.total_amount ?? 0));
   const amountPaid = Number(invoice.amount_paid ?? 0);
-  const outstanding = Math.max(grandTotal - amountPaid, 0);
+  // Round paid to the rupee too (settlement granularity) so "Balance Due" is 0
+  // for a fully-paid invoice regardless of which way the grand total rounded.
+  const outstanding = Math.max(grandTotal - Math.round(amountPaid), 0);
 
   const rows = (items || [])
     .map((it) => {

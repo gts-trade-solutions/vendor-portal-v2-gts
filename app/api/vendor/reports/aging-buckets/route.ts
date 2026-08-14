@@ -33,12 +33,12 @@ export async function GET(req: NextRequest) {
       COALESCE(SUM(CASE WHEN age > 90 THEN outstanding ELSE 0 END), 0) AS d90_plus
     FROM (
       SELECT
-        GREATEST(COALESCE(grand_total, total_amount, 0) - COALESCE(amount_paid, 0), 0) AS outstanding,
+        GREATEST(ROUND(COALESCE(grand_total, total_amount, 0)) - ROUND(COALESCE(amount_paid, 0)), 0) AS outstanding,
         DATEDIFF(CURDATE(), COALESCE(due_date, invoice_date)) AS age
       FROM invoices
       WHERE deleted_at IS NULL
         AND invoice_date BETWEEN ${from} AND ${to}
-        AND GREATEST(COALESCE(grand_total, total_amount, 0) - COALESCE(amount_paid, 0), 0) > 0
+        AND GREATEST(ROUND(COALESCE(grand_total, total_amount, 0)) - ROUND(COALESCE(amount_paid, 0)), 0) > 0
     ) AS t
   `;
 

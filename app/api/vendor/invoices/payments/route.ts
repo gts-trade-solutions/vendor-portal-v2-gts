@@ -3,53 +3,15 @@ export const dynamic = "force-dynamic";
 
 import { randomUUID } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
-import { Prisma } from "@prisma/client";
 import { assertVendorWriter } from "@/lib/auth/assertVendorWriter";
 import { prisma } from "@/lib/db/prisma";
 import { logActivity } from "@/lib/db/activityLog";
-
-// Recompute an invoice's payment rollup from its payment rows, mirroring the
-// Postgres `recompute_invoice_payment` side-effect that `add_invoice_payment` /
-// `delete_invoice_payment` ran inside their function bodies. Keeps
-// `amount_paid` / `payment_status` / `paid_at` consistent with the payments
-// table so the invoice UI's Paid / Outstanding figures stay correct.
-async function recomputeInvoicePayment(
-  tx: Prisma.TransactionClient,
-  invoiceId: string,
-) {
-  const agg = await tx.invoice_payments.aggregate({
-    where: { invoice_id: invoiceId },
-    _sum: { amount: true },
-  });
-  const amountPaid = Number(agg._sum.amount ?? 0);
-
-  const inv = await tx.invoices.findUnique({
-    where: { id: invoiceId },
-    select: { grand_total: true, total_amount: true, paid_at: true },
-  });
-  const total = Number(inv?.grand_total ?? inv?.total_amount ?? 0);
-
-  // Status mirrors recompute_invoice_payment: <=0 UNPAID, >= total PAID, else
-  // PARTIAL. (Postgres uses exact numeric and no total>0 guard, so a 0-total
-  // invoice with any payment is PAID — preserved here; tiny epsilon guards the
-  // Decimal->Number float compare.)
-  let status: "UNPAID" | "PARTIAL" | "PAID" = "UNPAID";
-  if (amountPaid <= 0) status = "UNPAID";
-  else if (Math.round(amountPaid * 100) >= Math.round(total * 100)) status = "PAID";
-  else status = "PARTIAL";
-
-  await tx.invoices.update({
-    where: { id: invoiceId },
-    data: {
-      amount_paid: amountPaid,
-      payment_status: status,
-      // coalesce(paid_at, now()) when PAID — keep the first-paid timestamp,
-      // clear it whenever the invoice is no longer fully paid.
-      paid_at: status === "PAID" ? inv?.paid_at ?? new Date() : null,
-      updated_at: new Date(),
-    },
-  });
-}
+// Single source of truth for the payment rollup. Previously this route carried
+// its own copy that compared amount_paid against the UNROUNDED grand_total —
+// so paying the displayed (nearest-rupee) amount left a sub-rupee remainder and
+// the invoice was stuck at PARTIAL. The shared helper settles on the rounded
+// grand total, matching what the UI shows, so a full payment reads PAID.
+import { recomputeInvoicePayment } from "@/lib/db/invoiceHelpers";
 
 // Port of the `add_invoice_payment(invoice_id, amount, method, reference, note,
 // paid_at)` RPC. Records a payment then recomputes the invoice rollup. Caller

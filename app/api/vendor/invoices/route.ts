@@ -196,7 +196,9 @@ export async function GET(req: NextRequest) {
         grand_total: any;
         total_amount: any;
         amount_paid: any;
-      }) => Number(r.grand_total ?? r.total_amount ?? 0) - Number(r.amount_paid ?? 0);
+      }) =>
+        Math.round(Number(r.grand_total ?? r.total_amount ?? 0)) -
+        Math.round(Number(r.amount_paid ?? 0));
 
       const orderedIds = candidates
         .slice()

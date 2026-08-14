@@ -492,7 +492,9 @@ export default function InvoiceViewPage() {
     Number(invoice?.grand_total ?? invoice?.total_amount ?? computed.grandTotal),
   );
   const amountPaid = Number(invoice?.amount_paid ?? 0);
-  const outstanding = round2(Math.max(grandTotalValue - amountPaid, 0));
+  // Rupee-granular settlement: round both sides so a round-up invoice paid to the
+  // exact paise (grand 14433.76 shown as 14434, paid 14433.76) reads 0 due, not 0.24.
+  const outstanding = Math.max(grandTotalValue - Math.round(amountPaid), 0);
   const paymentStatus = invoice?.payment_status ?? "UNPAID";
 
   // UPI payment QR: show only when the seller company has a VPA configured and

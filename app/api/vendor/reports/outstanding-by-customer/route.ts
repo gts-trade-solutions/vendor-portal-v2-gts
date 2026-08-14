@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
       COUNT(*) AS invoice_count,
       COALESCE(SUM(COALESCE(grand_total, total_amount, 0)), 0) AS billed,
       COALESCE(SUM(COALESCE(amount_paid, 0)), 0) AS paid,
-      COALESCE(SUM(GREATEST(COALESCE(grand_total, total_amount, 0) - COALESCE(amount_paid, 0), 0)), 0) AS outstanding
+      COALESCE(SUM(GREATEST(ROUND(COALESCE(grand_total, total_amount, 0)) - ROUND(COALESCE(amount_paid, 0)), 0)), 0) AS outstanding
     FROM invoices
     WHERE deleted_at IS NULL
       AND invoice_date BETWEEN ${from} AND ${to}

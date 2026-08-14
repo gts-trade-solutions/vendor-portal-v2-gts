@@ -69,8 +69,11 @@ export async function POST(req: NextRequest) {
 
   for (const inv of invs || []) {
     try {
-      const grand = Number(inv.grand_total ?? inv.total_amount ?? 0);
-      const paid = Number(inv.amount_paid ?? 0);
+      // Settle on the nearest rupee (what the invoice/email actually shows), so
+      // an invoice paid to the displayed amount isn't chased for a sub-rupee ghost.
+      // Both sides rounded so it holds whichever way the grand total rounded.
+      const grand = Math.round(Number(inv.grand_total ?? inv.total_amount ?? 0));
+      const paid = Math.round(Number(inv.amount_paid ?? 0));
       if (grand - paid <= 0) continue;
 
       // jsonSafe serializes the Date column to an ISO string; daysUntil expects

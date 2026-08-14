@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
       COUNT(DISTINCT company_id) AS company_count,
       COALESCE(SUM(COALESCE(grand_total, total_amount, 0)), 0) AS total_billed,
       COALESCE(SUM(COALESCE(amount_paid, 0)), 0) AS total_paid,
-      COALESCE(SUM(GREATEST(COALESCE(grand_total, total_amount, 0) - COALESCE(amount_paid, 0), 0)), 0) AS total_outstanding,
+      COALESCE(SUM(GREATEST(ROUND(COALESCE(grand_total, total_amount, 0)) - ROUND(COALESCE(amount_paid, 0)), 0)), 0) AS total_outstanding,
       COUNT(CASE WHEN payment_status = 'PAID' THEN 1 END) AS paid_count,
       COUNT(CASE WHEN payment_status = 'PARTIAL' THEN 1 END) AS partial_count,
       COUNT(CASE WHEN payment_status = 'UNPAID' OR payment_status IS NULL THEN 1 END) AS unpaid_count

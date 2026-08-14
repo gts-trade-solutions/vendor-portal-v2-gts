@@ -46,13 +46,19 @@ export async function recomputeInvoicePayment(
     where: { id: invoiceId },
     select: { grand_total: true, total_amount: true, paid_at: true },
   });
-  // Compare against the rounded grand total (invoices settle on the nearest
-  // rupee) so paying the shown outstanding marks the invoice PAID, not a ghost
-  // 0.xx-short PARTIAL — including for older invoices stored with paise.
+  // Invoices settle at RUPEE granularity, so compare BOTH sides rounded to the
+  // nearest rupee. Rounding only the grand total is asymmetric and breaks the
+  // two rounding directions differently:
+  //   • grand rounds DOWN (1630.03 -> 1630), customer pays 1630.00 -> PAID.
+  //   • grand rounds UP   (14433.76 -> 14434), customer paid the exact 14433.76;
+  //     rounding only the total would leave it 0.24 short -> ghost PARTIAL.
+  // Rounding amount_paid to the rupee too keeps both cases PAID and never chases
+  // a sub-rupee remainder.
   const total = Math.round(Number(inv?.grand_total ?? inv?.total_amount ?? 0));
+  const paidRounded = Math.round(amountPaid);
   let status: "UNPAID" | "PARTIAL" | "PAID" = "UNPAID";
   if (amountPaid <= 0) status = "UNPAID";
-  else if (Math.round(amountPaid * 100) >= Math.round(total * 100)) status = "PAID";
+  else if (paidRounded >= total) status = "PAID";
   else status = "PARTIAL";
   await tx.invoices.update({
     where: { id: invoiceId },

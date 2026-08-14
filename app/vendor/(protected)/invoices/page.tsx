@@ -76,8 +76,9 @@ function formatDate(value?: string | null) {
 
 function getOutstanding(inv: InvoiceRow) {
   // Grand total is displayed/settled on the nearest rupee (see invoice pages).
+  // Round paid too so a round-up invoice paid to the exact paise reads 0 due.
   const grand = Math.round(Number(inv.grand_total ?? inv.total_amount ?? 0));
-  const paid = Number(inv.amount_paid ?? 0);
+  const paid = Math.round(Number(inv.amount_paid ?? 0));
   return Math.max(grand - paid, 0);
 }
 
@@ -454,7 +455,7 @@ export default function InvoicesListPage() {
         Customer: inv.customer_name || "",
         Billed: billed,
         Paid: paid,
-        Outstanding: Math.max(billed - paid, 0),
+        Outstanding: Math.max(billed - Math.round(paid), 0),
         Status: inv.payment_status || "UNPAID",
       };
     });
@@ -465,7 +466,7 @@ export default function InvoicesListPage() {
         const paid = Number(inv.amount_paid ?? 0);
         acc.billed += billed;
         acc.paid += paid;
-        acc.outstanding += Math.max(billed - paid, 0);
+        acc.outstanding += Math.max(billed - Math.round(paid), 0);
         return acc;
       },
       { billed: 0, paid: 0, outstanding: 0 },

@@ -119,7 +119,7 @@ export async function GET() {
     prisma.$queryRaw<{ cnt: bigint; outstanding: any }[]>(Prisma.sql`
       SELECT
         COUNT(*) AS cnt,
-        COALESCE(SUM(GREATEST(COALESCE(grand_total, total_amount, 0) - COALESCE(amount_paid, 0), 0)), 0) AS outstanding
+        COALESCE(SUM(GREATEST(ROUND(COALESCE(grand_total, total_amount, 0)) - ROUND(COALESCE(amount_paid, 0)), 0)), 0) AS outstanding
       FROM invoices
       WHERE deleted_at IS NULL
         AND due_date IS NOT NULL
